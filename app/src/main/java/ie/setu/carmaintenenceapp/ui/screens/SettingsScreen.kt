@@ -10,17 +10,18 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Button
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 
 
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier) {
-    var carName by rememberSaveable { mutableStateOf("BMW 520D") }
+    var carName by remember { mutableStateOf(viewModel.carName.value) }
 
     Column(
         modifier = modifier
@@ -35,7 +36,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             label = { Text("Car Name") }
         )
         Spacer(Modifier.height(16.dp))
-        Button(onClick = { /* Save logic here */ }) {
+        Button(onClick = { viewmodel.updateCarName(carName)}) {
             Text("Save Changes")
         }
     }

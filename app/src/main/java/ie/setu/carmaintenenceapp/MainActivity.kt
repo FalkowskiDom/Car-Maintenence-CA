@@ -23,10 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.lifecycle.ViewModel
 import ie.setu.carmaintenenceapp.ui.theme.CarMaintenenceAppTheme
 import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
 import ie.setu.carmaintenenceapp.ui.screens.ReminderScreen
 import ie.setu.carmaintenenceapp.ui.screens.SettingsScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
+import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -45,6 +48,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CarMaintenenceApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    val carViewModel: CarViewModel = ViewModel() // shared across screens
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -60,9 +64,18 @@ fun CarMaintenenceApp() {
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(Modifier.padding(innerPadding))
-                AppDestinations.REMINDERS -> ReminderScreen(Modifier.padding(innerPadding))
-                AppDestinations.SETTINGS -> SettingsScreen(Modifier.padding(innerPadding))
+                AppDestinations.HOME -> HomeScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    viewModel = carViewModel
+                )
+                AppDestinations.REMINDERS -> ReminderScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    viewModel = carViewModel
+                )
+                AppDestinations.SETTINGS -> SettingsScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    viewModel = carViewModel
+                )
             }
         }
     }
