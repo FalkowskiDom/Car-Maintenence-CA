@@ -14,13 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Button
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 
 
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier) {
+fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel) {
     var carName by remember { mutableStateOf(viewModel.carName.value) }
 
     Column(
@@ -36,7 +35,7 @@ fun SettingsScreen(modifier: Modifier = Modifier) {
             label = { Text("Car Name") }
         )
         Spacer(Modifier.height(16.dp))
-        Button(onClick = { viewmodel.updateCarName(carName)}) {
+        Button(onClick = { viewModel.updateCarName(carName) }) {
             Text("Save Changes")
         }
     }

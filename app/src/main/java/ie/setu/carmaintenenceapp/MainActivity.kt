@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.lifecycle.ViewModel
 import ie.setu.carmaintenenceapp.ui.theme.CarMaintenenceAppTheme
 import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
 import ie.setu.carmaintenenceapp.ui.screens.ReminderScreen
@@ -31,14 +30,13 @@ import ie.setu.carmaintenenceapp.ui.screens.SettingsScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             CarMaintenenceAppTheme {
-                CarMaintenenceApp()
+                CarMaintenanceApp()
             }
         }
     }
@@ -46,9 +44,9 @@ class MainActivity : ComponentActivity() {
 
 @PreviewScreenSizes
 @Composable
-fun CarMaintenenceApp() {
+fun CarMaintenanceApp() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
-    val carViewModel: CarViewModel = ViewModel() // shared across screens
+    val carViewModel: CarViewModel = viewModel()
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
