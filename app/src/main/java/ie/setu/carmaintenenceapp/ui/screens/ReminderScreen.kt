@@ -1,7 +1,9 @@
 package ie.setu.carmaintenenceapp.ui.screens
 
-import android.R.attr.label
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -9,6 +11,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.rememberDatePickerState
+@Composable
+private fun Modifier.noIndicationClickable(onClick: () -> Unit): Modifier =
+    this.then(
+        androidx.compose.ui.Modifier
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) { onClick() }
+    )
 
 @Composable
 fun ReminderScreen(modifier: Modifier = Modifier, viewModel: CarViewModel) {
@@ -89,13 +105,12 @@ fun AddReminderDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> 
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
-                // Service type dropdown
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
                 ) {
                     OutlinedTextField(
-                        modifier = Modifier.menuAnchor().fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         readOnly = true,
                         value = selectedService,
                         onValueChange = {},
@@ -117,6 +132,7 @@ fun AddReminderDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> 
                         }
                     }
                 }
+
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
@@ -128,13 +144,23 @@ fun AddReminderDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> 
                         if (dateText.isEmpty()) Text("Select a date")
                     }
                 )
+                LaunchedEffect(dateText) {  }
+                Box(
+                    modifier = Modifier
+                        .offset(y = (-76).dp)
+                        .height(56.dp)
+                        .fillMaxWidth()
+                        .noIndicationClickable { showDatePicker = true }
+                )
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = desc,
+                        onValueChange = {desc=it},
+                        label = { Text("Description") },
+                    )
+                }
+            },
 
-
-
-
-
-            }
-        },
         confirmButton = {
             Button(
                 enabled = selectedDateMillis != null && selectedService.isNotEmpty(),
@@ -152,4 +178,23 @@ fun AddReminderDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> 
             }
         }
     )
+    if (showDatePicker) {
+        val pickerState = rememberDatePickerState(
+            initialSelectedDateMillis = selectedDateMillis
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedDateMillis = pickerState.selectedDateMillis
+                    showDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = pickerState)
+        }
+    }
 }
