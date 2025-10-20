@@ -14,19 +14,19 @@ fun SettingsScreen(
 ) {
     var carMake by remember { mutableStateOf(viewModel.carMake.value) }
     var carReg by remember { mutableStateOf(viewModel.carReg.value) }
-    var carYear by remember { mutableStateOf(viewModel.carYear.value.toString()) }
+    var carYear by remember { mutableStateOf(viewModel.carYear.intValue.toString()) }
     var engineType by remember { mutableStateOf(viewModel.engineType.value) }
-    var carMileage by remember { mutableStateOf(viewModel.carMileage.value.toString()) }
+    var carMileage by remember { mutableStateOf(viewModel.carMileage.intValue.toString()) }
     var carModel by remember { mutableStateOf(viewModel.carModel.value) }
-    var serviceInterval by remember { mutableStateOf(viewModel.serviceInterval.value.toString()) }
-    var engineSize by remember { mutableStateOf(viewModel.engineSize.value.toString()) }
-
+    var serviceInterval by remember { mutableStateOf(viewModel.serviceInterval.intValue.toString()) }
+    var engineSize by remember { mutableStateOf(viewModel.engineSize.value) }
+    var lastServiceDateValue by remember { mutableStateOf(viewModel.lastServiceDate.value) }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text("Car Profile Settings", style = MaterialTheme.typography.titleLarge)
 
@@ -82,6 +82,12 @@ fun SettingsScreen(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
+        OutlinedTextField(
+            value = lastServiceDateValue,
+            onValueChange = { lastServiceDateValue = it },
+            label = { Text("Last Service Date (DD/MM/YYYY)") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
 
         Spacer(Modifier.height(8.dp))
@@ -101,6 +107,7 @@ fun SettingsScreen(
                     interval = intervalValue,
                     engineType = engineType,
                     engineSize = engineSize,
+                    lastServiceDate = lastServiceDateValue
                 )
             },
             modifier = Modifier.fillMaxWidth()

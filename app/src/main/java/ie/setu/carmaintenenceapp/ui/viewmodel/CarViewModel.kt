@@ -4,12 +4,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+@kotlinx.serialization.Serializable
 data class ServiceReminder(
     val title: String,
     val date: String,
     val description: String
 )
-
 class CarViewModel : ViewModel() {
     var carReg = mutableStateOf("")
     var carMileage = mutableIntStateOf(0)
@@ -19,6 +21,19 @@ class CarViewModel : ViewModel() {
     var serviceInterval = mutableIntStateOf(10000)
     var engineType = mutableStateOf("")
     var engineSize = mutableStateOf("")
+    var lastServiceDate = mutableStateOf("")
+
+    val nextServiceMileage: Int
+    get() = carMileage.intValue + serviceInterval.intValue
+
+    val nextServiceDate: String
+        get() = try {
+            val formatter = DateTimeFormatter.ofPattern("DD/MM/YYYY")
+            val lastDate = LocalDate.parse(lastServiceDate.value, formatter)
+            lastDate.plusMonths(6).format(formatter)
+        } catch (e: Exception) {
+            "Not Set"
+        }
     var reminders = mutableStateListOf<ServiceReminder>()
     fun addReminder(title: String, date: String, description: String) {
         reminders.add(ServiceReminder(title, date, description))
@@ -35,7 +50,8 @@ class CarViewModel : ViewModel() {
         year: Int,
         interval: Int,
         engineType: String,
-        engineSize: String
+        engineSize: String,
+        lastServiceDate: String
     ) {
         carReg.value = reg
         carMileage.intValue = mileage
@@ -45,5 +61,6 @@ class CarViewModel : ViewModel() {
         serviceInterval.intValue = interval
         this.engineSize.value = engineSize
         this.engineType.value = engineType
+        this.lastServiceDate.value = lastServiceDate
     }
 }
