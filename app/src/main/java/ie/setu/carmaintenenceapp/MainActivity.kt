@@ -23,11 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import ie.setu.carmaintenenceapp.ui.theme.CarMaintenenceAppTheme
 import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
 import ie.setu.carmaintenenceapp.ui.screens.ReminderScreen
 import ie.setu.carmaintenenceapp.ui.screens.SettingsScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ie.setu.carmaintenenceapp.ui.theme.CarMaintenanceAppTheme
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 
 class MainActivity : ComponentActivity() {
@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CarMaintenenceAppTheme {
+            CarMaintenanceAppTheme {
                 CarMaintenanceApp()
             }
         }
@@ -100,7 +100,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    CarMaintenenceAppTheme {
+    CarMaintenanceAppTheme {
         Greeting("Android")
     }
 }
