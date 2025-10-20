@@ -1,41 +1,110 @@
 package ie.setu.carmaintenenceapp.ui.screens
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.Button
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.*
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 
-
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel) {
-    var carName by remember { mutableStateOf(viewModel.carName.value) }
+fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    viewModel: CarViewModel
+) {
+    var carMake by remember { mutableStateOf(viewModel.carMake.value) }
+    var carReg by remember { mutableStateOf(viewModel.carReg.value) }
+    var carYear by remember { mutableStateOf(viewModel.carYear.value.toString()) }
+    var engineType by remember { mutableStateOf(viewModel.engineType.value) }
+    var carMileage by remember { mutableStateOf(viewModel.carMileage.value.toString()) }
+    var carModel by remember { mutableStateOf(viewModel.carModel.value) }
+    var serviceInterval by remember { mutableStateOf(viewModel.serviceInterval.value.toString()) }
+    var engineSize by remember { mutableStateOf(viewModel.engineSize.value.toString()) }
+
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text("Settings", style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(16.dp))
+        Text("Car Profile Settings", style = MaterialTheme.typography.titleLarge)
+
         OutlinedTextField(
-            value = carName,
-            onValueChange = { carName = it },
-            label = { Text("Car Name") }
+            value = carReg,
+            onValueChange = { carReg = it },
+            label = { Text("Registration Number") },
+            modifier = Modifier.fillMaxWidth()
         )
-        Spacer(Modifier.height(16.dp))
-        Button(onClick = { viewModel.updateCarName(carName) }) {
+        OutlinedTextField(
+            value = carMake,
+            onValueChange = { carMake = it },
+            label = { Text("Car Make") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = carModel,
+            onValueChange = { carModel = it },
+            label = { Text("Car Model") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = carYear,
+            onValueChange = { newVal -> carYear = newVal.filter { it.isDigit() } },
+            label = { Text("Year of Manufacture") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = carMileage,
+            onValueChange = { newVal -> carMileage = newVal.filter { it.isDigit() } },
+            label = { Text("Current Mileage (km)") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = serviceInterval,
+            onValueChange = { newVal -> serviceInterval = newVal.filter { it.isDigit() } },
+            label = { Text("Preferred Service Interval (km)") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = engineType,
+            onValueChange = { engineType = it },
+            label = { Text("Engine Type") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = engineSize,
+            onValueChange = { newVal -> engineSize = newVal.filter { it.isDigit() } },
+            label = { Text("Engine Size (cc)") },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+
+        Spacer(Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                val mileageValue = carMileage.toIntOrNull() ?: 0
+                val intervalValue = serviceInterval.toIntOrNull() ?: 10000
+                val yearValue = carYear.toIntOrNull() ?: 0
+
+                viewModel.updateCarProfile(
+                    reg = carReg,
+                    mileage = mileageValue,
+                    make = carMake,
+                    model = carModel,
+                    year = yearValue,
+                    interval = intervalValue,
+                    engineType = engineType,
+                    engineSize = engineSize,
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Save Changes")
         }
     }

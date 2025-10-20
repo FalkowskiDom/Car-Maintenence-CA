@@ -16,6 +16,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 @Composable
 private fun Modifier.noIndicationClickable(onClick: () -> Unit): Modifier =
     this.then(
@@ -110,12 +111,15 @@ fun AddReminderDialog(onDismiss: () -> Unit, onAdd: (String, String, String) -> 
                     onExpandedChange = { expanded = !expanded }
                 ) {
                     OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable)
+                                .fillMaxWidth(),
                         readOnly = true,
                         value = selectedService,
                         onValueChange = {},
                         label = { Text("Service Type") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) }
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                        colors = ExposedDropdownMenuDefaults.textFieldColors()
                     )
                     ExposedDropdownMenu(
                         expanded = expanded,
