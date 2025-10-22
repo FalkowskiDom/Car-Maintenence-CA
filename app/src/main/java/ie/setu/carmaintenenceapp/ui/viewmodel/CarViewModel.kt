@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import ie.setu.carmaintenenceapp.data.CarProfile
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 @kotlinx.serialization.Serializable
@@ -62,5 +63,16 @@ class CarViewModel : ViewModel() {
         this.engineSize.value = engineSize
         this.engineType.value = engineType
         this.lastServiceDate.value = lastServiceDate
+    }
+    fun loadFromProfile(profile: CarProfile) {
+        carMake.value = profile.make
+        carModel.value = profile.model
+        carReg.value = profile.reg
+        carMileage.intValue = profile.mileage
+        carYear.intValue = profile.year
+        engineType.value = profile.engineType
+        engineSize.value = profile.engineSize
+        serviceInterval.intValue = profile.serviceInterval
+        lastServiceDate.value = profile.lastServiceDate
     }
 }

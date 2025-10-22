@@ -3,60 +3,70 @@ package ie.setu.carmaintenenceapp.data
 import android.content.Context
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 
 val Context.dataStore by preferencesDataStore("car_prefs")
 
-object CarPrefsKeys {
-    val CAR_REG = stringPreferencesKey("car_reg")
-    val CAR_MAKE = stringPreferencesKey("car_make")
-    val CAR_MODEL = stringPreferencesKey("car_model")
-    val CAR_YEAR = intPreferencesKey("car_year")
-    val CAR_MILEAGE = intPreferencesKey("car_mileage")
-    val SERVICE_INTERVAL = intPreferencesKey("service_interval")
-    val ENGINE_TYPE = stringPreferencesKey("engine_type")
-    val ENGINE_SIZE = stringPreferencesKey("engine_size")
-    val LAST_SERVICE_DATE = stringPreferencesKey("last_service_date")
-    val REMINDERS = stringPreferencesKey("reminders_json")
+class CarDataStore(private val context: Context) {
+    companion object {
+    private val CAR_REG = stringPreferencesKey("car_reg")
+    private val CAR_MAKE = stringPreferencesKey("car_make")
+    private val CAR_MODEL = stringPreferencesKey("car_model")
+    private val CAR_YEAR = intPreferencesKey("car_year")
+    private val CAR_MILEAGE = intPreferencesKey("car_mileage")
+    private val SERVICE_INTERVAL = intPreferencesKey("service_interval")
+    private val ENGINE_TYPE = stringPreferencesKey("engine_type")
+    private val ENGINE_SIZE = stringPreferencesKey("engine_size")
+    private val LAST_SERVICE_DATE = stringPreferencesKey("last_service_date")
+    private val REMINDERS = stringPreferencesKey("reminders_json")
 }
 
-fun saveCarData(context: Context, viewModel: ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel) = runBlocking {
-    val json = Json.encodeToString(viewModel.reminders.toList())
-    context.dataStore.edit { prefs ->
-        prefs[CarPrefsKeys.CAR_REG] = viewModel.carReg.value
-        prefs[CarPrefsKeys.CAR_MAKE] = viewModel.carMake.value
-        prefs[CarPrefsKeys.CAR_MODEL] = viewModel.carModel.value
-        prefs[CarPrefsKeys.CAR_YEAR] = viewModel.carYear.intValue
-        prefs[CarPrefsKeys.CAR_MILEAGE] = viewModel.carMileage.intValue
-        prefs[CarPrefsKeys.SERVICE_INTERVAL] = viewModel.serviceInterval.intValue
-        prefs[CarPrefsKeys.ENGINE_TYPE] = viewModel.engineType.value
-        prefs[CarPrefsKeys.ENGINE_SIZE] = viewModel.engineSize.value
-        prefs[CarPrefsKeys.LAST_SERVICE_DATE] = viewModel.lastServiceDate.value
-        prefs[CarPrefsKeys.REMINDERS] = json
+    suspend fun saveCarData(
+        make: String,
+        model: String,
+        reg: String,
+        mileage: Int,
+        year: Int,
+        engineType: String,
+        engineSize: String,
+        serviceInterval: Int,
+        lastServiceDate: String
+    ) {
+        context.dataStore.edit { prefs ->
+            prefs[CAR_MAKE] = make
+            prefs[CAR_MODEL] = model
+            prefs[CAR_REG] = reg
+            prefs[CAR_MILEAGE] = mileage
+            prefs[CAR_YEAR] = year
+            prefs[ENGINE_TYPE] = engineType
+            prefs[ENGINE_SIZE] = engineSize
+            prefs[SERVICE_INTERVAL] = serviceInterval
+            prefs[LAST_SERVICE_DATE] = lastServiceDate
+        }
+    }
+    val carDataFlow = context.dataStore.data.map { prefs ->
+        CarProfile(
+            make = prefs[CAR_MAKE] ?: "",
+            model = prefs[CAR_MODEL] ?: "",
+            reg = prefs[CAR_REG] ?: "",
+            mileage = prefs[CAR_MILEAGE] ?: 0,
+            year = prefs[CAR_YEAR] ?: 0,
+            engineType = prefs[ENGINE_TYPE] ?: "",
+            engineSize = prefs[ENGINE_SIZE] ?: "",
+            serviceInterval = prefs[SERVICE_INTERVAL] ?: 10000,
+            lastServiceDate = prefs[LAST_SERVICE_DATE] ?: ""
+        )
     }
 }
 
-fun loadCarData(context: Context, viewModel: ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel) = runBlocking {
-    val prefs = context.dataStore.data.map { it }.first()
-
-    viewModel.carReg.value = prefs[CarPrefsKeys.CAR_REG] ?: ""
-    viewModel.carMake.value = prefs[CarPrefsKeys.CAR_MAKE] ?: ""
-    viewModel.carModel.value = prefs[CarPrefsKeys.CAR_MODEL] ?: ""
-    viewModel.carYear.intValue = prefs[CarPrefsKeys.CAR_YEAR] ?: 0
-    viewModel.carMileage.intValue = prefs[CarPrefsKeys.CAR_MILEAGE] ?: 0
-    viewModel.serviceInterval.intValue = prefs[CarPrefsKeys.SERVICE_INTERVAL] ?: 10000
-    viewModel.engineType.value = prefs[CarPrefsKeys.ENGINE_TYPE] ?: ""
-    viewModel.engineSize.value = prefs[CarPrefsKeys.ENGINE_SIZE] ?: ""
-    viewModel.lastServiceDate.value = prefs[CarPrefsKeys.LAST_SERVICE_DATE] ?: ""
-
-    val remindersJson = prefs[CarPrefsKeys.REMINDERS]
-    if (!remindersJson.isNullOrEmpty()) {
-        val list = Json.decodeFromString<List<ServiceReminder>>(remindersJson)
-        viewModel.reminders.clear()
-        viewModel.reminders.addAll(list)
-    }
-}
+    data class CarProfile(
+        val make: String,
+        val model: String,
+        val reg: String,
+        val mileage: Int,
+        val year: Int,
+        val engineType: String,
+        val engineSize: String,
+        val serviceInterval: Int,
+        val lastServiceDate: String
+    )
