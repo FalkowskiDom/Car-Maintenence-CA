@@ -75,4 +75,33 @@ class CarViewModel : ViewModel() {
         serviceInterval.intValue = profile.serviceInterval
         lastServiceDate.value = profile.lastServiceDate
     }
+    fun loadFromDataStore(profile: CarProfile?, reminders: List<ServiceReminder>) {
+        if (profile != null) {
+            carMake.value = profile.make
+            carModel.value = profile.model
+            carReg.value = profile.reg
+            carMileage.intValue = profile.mileage
+            carYear.intValue = profile.year
+            engineType.value = profile.engineType
+            engineSize.value = profile.engineSize
+            serviceInterval.intValue = profile.serviceInterval
+            lastServiceDate.value = profile.lastServiceDate
+        }
+        this.reminders.clear()
+        this.reminders.addAll(reminders)
+    }
+
+    fun getCurrentProfile(): CarProfile {
+        return CarProfile(
+            make = carMake.value,
+            model = carModel.value,
+            reg = carReg.value,
+            mileage = carMileage.intValue,
+            year = carYear.intValue,
+            engineType = engineType.value,
+            engineSize = engineSize.value,
+            serviceInterval = serviceInterval.intValue,
+            lastServiceDate = lastServiceDate.value
+        )
+    }
 }

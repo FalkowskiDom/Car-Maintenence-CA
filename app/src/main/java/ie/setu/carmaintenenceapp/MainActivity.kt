@@ -31,7 +31,6 @@ import ie.setu.carmaintenenceapp.ui.theme.CarMaintenanceAppTheme
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -41,8 +40,8 @@ class MainActivity : ComponentActivity() {
         val dataStore = CarDataStore(applicationContext)
 
         CoroutineScope(Dispatchers.IO).launch {
-            dataStore.carDataFlow.collectLatest { profile ->
-                viewModel.loadFromProfile(profile)
+            dataStore.loadData.collect { (car, reminders) ->
+                viewModel.loadFromDataStore(car, reminders)
             }
         }
         enableEdgeToEdge()

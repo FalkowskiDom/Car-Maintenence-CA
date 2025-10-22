@@ -8,34 +8,31 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Color(0xFF90CAF9),
+    onPrimary = Color.Black,
+    secondary = Color(0xFF8D6E63),
+    onSecondary = Color.Black,
+    background = Color(0xFF121212),
+    surface = Color(0xFF1E1E1E),
+    onSurface = Color(0xFFE0E0E0)
 )
-
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = Color(0xFF1E88E5),
     onPrimary = Color.White,
+    secondary = Color(0xFF6D4C41),
     onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = Color(0xFFF7F9FB),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF212121)
 )
 
 @Composable
 fun CarMaintenanceAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -50,7 +47,7 @@ fun CarMaintenanceAppTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme,
         typography = Typography,
         content = content
     )
