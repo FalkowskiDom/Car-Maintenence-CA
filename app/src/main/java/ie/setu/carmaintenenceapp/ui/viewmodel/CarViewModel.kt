@@ -28,7 +28,7 @@ class CarViewModel : ViewModel() {
 
     val nextServiceDate: String
         get() = try {
-            val formatter = DateTimeFormatter.ofPattern("DD/MM/YYYY")
+            val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
             val lastDate = LocalDate.parse(lastServiceDate.value, formatter)
             lastDate.plusMonths(6).format(formatter)
         } catch (e: Exception) {
