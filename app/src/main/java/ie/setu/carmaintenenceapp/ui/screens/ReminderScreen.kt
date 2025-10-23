@@ -26,7 +26,6 @@ private fun Modifier.noIndicationClickable(onClick: () -> Unit): Modifier =
             interactionSource = remember { MutableInteractionSource() }
         ) { onClick() }
     )
-
 @Composable
 fun ReminderScreen(
     modifier: Modifier = Modifier,
@@ -34,7 +33,7 @@ fun ReminderScreen(
     dataStore: CarDataStore
 ) {
     var openDialog by remember { mutableStateOf(false) }
-
+    val coroutineScope = rememberCoroutineScope()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -42,7 +41,13 @@ fun ReminderScreen(
     ) {
         Text("Service Reminders", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(8.dp))
-        Button(onClick = { openDialog = true }) { Text("Add Reminder") }
+
+        Button(
+            onClick = { openDialog = true },
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
+        ) {
+            Text("Add Reminder")
+        }
         Spacer(Modifier.height(12.dp))
         LazyColumn {
             items(viewModel.reminders) { reminder ->
@@ -65,11 +70,14 @@ fun ReminderScreen(
                         }
                         IconButton(onClick = {
                             viewModel.removeReminder(reminder)
-                            CoroutineScope(Dispatchers.IO).launch {
-                                dataStore.saveCarData(viewModel.getCurrentProfile(), viewModel.reminders)
+                            coroutineScope.launch(Dispatchers.IO) {
+                                dataStore.saveCarData(
+                                    viewModel.getCurrentProfile(),
+                                    viewModel.reminders
+                                )
                             }
                         }) {
-                            Icon(Icons.Default.Close, contentDescription = "Delete")
+                            Icon(Icons.Default.Close, contentDescription = "Delete reminder")
                         }
                     }
                 }
@@ -78,16 +86,13 @@ fun ReminderScreen(
     }
 
     if (openDialog) {
-        AddReminderDialog(
-            onDismiss = { openDialog = false },
-            onAdd = { title, date, desc ->
-                viewModel.addReminder(title, date, desc)
-                CoroutineScope(Dispatchers.IO).launch {
-                    dataStore.saveCarData(viewModel.getCurrentProfile(), viewModel.reminders)
-                }
-                openDialog = false
+        AddReminderDialog(onDismiss = { openDialog = false }) { title, date, desc ->
+            viewModel.addReminder(title, date, desc)
+            coroutineScope.launch(Dispatchers.IO) {
+                dataStore.saveCarData(viewModel.getCurrentProfile(), viewModel.reminders)
             }
-        )
+            openDialog = false
+        }
     }
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -155,7 +160,6 @@ fun AddReminderDialog(
                     onValueChange = {},
                     label = { Text("Service Date") },
                     placeholder = { Text("Select a date") },
-                    supportingText = { if (dateText.isEmpty()) Text("Select a date") }
                 )
                 Box(
                     modifier = Modifier

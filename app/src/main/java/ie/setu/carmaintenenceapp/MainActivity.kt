@@ -16,6 +16,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -46,7 +47,8 @@ class MainActivity : ComponentActivity() {
         }
         enableEdgeToEdge()
         setContent {
-            CarMaintenanceAppTheme {
+            val darkMode by dataStore.darkModeEnabled.collectAsState(initial = false)
+            CarMaintenanceAppTheme(darkTheme = darkMode) {
                 CarMaintenanceApp(viewModel = viewModel, dataStore = dataStore)
             }
         }
@@ -76,11 +78,14 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
                 )
                 AppDestinations.REMINDERS -> ReminderScreen(
                     modifier = Modifier.padding(innerPadding),
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    dataStore = dataStore
                 )
+
                 AppDestinations.SETTINGS -> SettingsScreen(
                     modifier = Modifier.padding(innerPadding),
-                    viewModel =  viewModel
+                    viewModel = viewModel,
+                    dataStore = dataStore
                 )
             }
         }

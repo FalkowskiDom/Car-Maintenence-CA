@@ -1,6 +1,7 @@
 package ie.setu.carmaintenenceapp.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -13,14 +14,22 @@ val Context.dataStore by preferencesDataStore("car_prefs")
 
 class CarDataStore(private val context: Context) {
     companion object {
-    private val CAR_DATA = stringPreferencesKey("car_data")
-    private val REMINDERS = stringPreferencesKey("reminders")
-}
+        private val CAR_DATA = stringPreferencesKey("car_data")
+        private val REMINDERS = stringPreferencesKey("reminders")
+
+        private val DARK_MODE = booleanPreferencesKey("dark_mode")
+
+    }
 
     suspend fun saveCarData(car: CarProfile, reminders: List<ServiceReminder>) {
         context.dataStore.edit { prefs ->
             prefs[CAR_DATA] = Json.encodeToString(car)
             prefs[REMINDERS] = Json.encodeToString(reminders)
+        }
+    }
+    suspend fun saveDarkMode(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[DARK_MODE] = enabled
         }
     }
     val loadData: Flow<Pair<CarProfile?, List<ServiceReminder>>> =
@@ -31,6 +40,8 @@ class CarDataStore(private val context: Context) {
             } ?: emptyList()
             car to reminders
         }
+    val darkModeEnabled: Flow<Boolean> =
+        context.dataStore.data.map { prefs -> prefs[DARK_MODE] ?: false }
 }
 @kotlinx.serialization.Serializable
     data class CarProfile(
