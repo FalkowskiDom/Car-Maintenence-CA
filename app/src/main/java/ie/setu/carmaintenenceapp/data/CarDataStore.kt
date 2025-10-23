@@ -9,6 +9,7 @@ import ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
 
 val Context.dataStore by preferencesDataStore("car_prefs")
 
@@ -43,7 +44,7 @@ class CarDataStore(private val context: Context) {
     val darkModeEnabled: Flow<Boolean> =
         context.dataStore.data.map { prefs -> prefs[DARK_MODE] ?: false }
 }
-@kotlinx.serialization.Serializable
+@Serializable
     data class CarProfile(
         val make: String,
         val model: String,

@@ -5,9 +5,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import ie.setu.carmaintenenceapp.data.CarProfile
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-@kotlinx.serialization.Serializable
+@Serializable
 data class ServiceReminder(
     val title: String,
     val date: String,
@@ -64,17 +65,6 @@ class CarViewModel : ViewModel() {
         this.engineType.value = engineType
         this.lastServiceDate.value = lastServiceDate
     }
-    fun loadFromProfile(profile: CarProfile) {
-        carMake.value = profile.make
-        carModel.value = profile.model
-        carReg.value = profile.reg
-        carMileage.intValue = profile.mileage
-        carYear.intValue = profile.year
-        engineType.value = profile.engineType
-        engineSize.value = profile.engineSize
-        serviceInterval.intValue = profile.serviceInterval
-        lastServiceDate.value = profile.lastServiceDate
-    }
     fun loadFromDataStore(profile: CarProfile?, reminders: List<ServiceReminder>) {
         if (profile != null) {
             carMake.value = profile.make
@@ -91,8 +81,7 @@ class CarViewModel : ViewModel() {
         this.reminders.addAll(reminders)
     }
 
-    fun getCurrentProfile(): CarProfile {
-        return CarProfile(
+    fun getCurrentProfile(): CarProfile = CarProfile(
             make = carMake.value,
             model = carModel.value,
             reg = carReg.value,
@@ -104,4 +93,3 @@ class CarViewModel : ViewModel() {
             lastServiceDate = lastServiceDate.value
         )
     }
-}
