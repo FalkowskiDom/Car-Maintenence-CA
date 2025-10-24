@@ -15,6 +15,7 @@ activityCompose = "1.11.0"
 composeBom = "2025.10.00"
 lifecycleViewmodelCompose = "2.8.0"
 foundationLayout = "1.9.3"
+foundation = "1.9.4"
 
 [libraries]
 androidx-compose-foundation-layout-v174 = { module = "androidx.compose.foundation:foundation-layout", version.ref = "foundationLayoutVersion" }
@@ -43,6 +44,7 @@ androidx-compose-foundation-layout = { group = "androidx.compose.foundation", na
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-serialization-json-v163 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJsonVersion" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

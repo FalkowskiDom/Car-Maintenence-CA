@@ -28,7 +28,7 @@ class CarDataStore(private val context: Context) {
             prefs[REMINDERS] = Json.encodeToString(reminders)
         }
     }
-    suspend fun saveDarkMode(enabled: Boolean) {
+    suspend fun setDarkMode(enabled: Boolean) {
         context.dataStore.edit { prefs ->
             prefs[DARK_MODE] = enabled
         }

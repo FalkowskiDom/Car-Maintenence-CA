@@ -33,17 +33,15 @@ fun HomeScreen(modifier: Modifier = Modifier,viewModel: CarViewModel) {
         ) {
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    text = "Your Current Car",
+                    text = "Your Car",
                     style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Spacer(Modifier.height(8.dp))
-                Text("Reg: $carReg", style = MaterialTheme.typography.bodyMedium)
                 Text(
                     "Make & Model: $carMake $carModel",
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text("Mileage: $carMileage km", style = MaterialTheme.typography.bodyMedium)
                 Spacer(Modifier.height(8.dp))
                 Text("Last Service: $lastService", style = MaterialTheme.typography.bodyMedium)
                 Text("Next Service Due:", style = MaterialTheme.typography.titleMedium)

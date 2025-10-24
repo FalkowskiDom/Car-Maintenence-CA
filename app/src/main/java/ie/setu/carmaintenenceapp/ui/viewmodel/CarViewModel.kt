@@ -82,14 +82,14 @@ class CarViewModel : ViewModel() {
     }
 
     fun getCurrentProfile(): CarProfile = CarProfile(
-            make = carMake.value,
-            model = carModel.value,
-            reg = carReg.value,
-            mileage = carMileage.intValue,
-            year = carYear.intValue,
-            engineType = engineType.value,
-            engineSize = engineSize.value,
-            serviceInterval = serviceInterval.intValue,
-            lastServiceDate = lastServiceDate.value
-        )
+        make = carMake.value,
+        model = carModel.value,
+        reg = carReg.value,
+        mileage = carMileage.intValue,
+        year = carYear.intValue,
+        engineType = engineType.value,
+        engineSize = engineSize.value,
+        serviceInterval = serviceInterval.intValue,
+        lastServiceDate = lastServiceDate.value
+    )
     }
