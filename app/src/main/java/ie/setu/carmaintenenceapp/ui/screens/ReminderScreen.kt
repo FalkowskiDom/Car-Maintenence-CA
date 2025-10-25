@@ -18,6 +18,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
+
+
+// Helper extension to create a clickable area without ripple animation
 @Composable
 private fun Modifier.noIndicationClickable(onClick: () -> Unit): Modifier =
     this.then(
@@ -26,29 +29,39 @@ private fun Modifier.noIndicationClickable(onClick: () -> Unit): Modifier =
             interactionSource = remember { MutableInteractionSource() }
         ) { onClick() }
     )
+
+
 @Composable
 fun ReminderScreen(
     modifier: Modifier = Modifier,
     viewModel: CarViewModel,
     dataStore: CarDataStore
 ) {
+    // Controls showing the Add Reminder dialog
     var openDialog by remember { mutableStateOf(false) }
+
     val coroutineScope = rememberCoroutineScope()
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         Text("Service Reminders", style = MaterialTheme.typography.titleLarge)
+
         Spacer(Modifier.height(8.dp))
 
+        // Button to show add reminder dialog
         Button(
             onClick = { openDialog = true },
             colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary)
         ) {
             Text("Add Reminder")
         }
+
         Spacer(Modifier.height(12.dp))
+
+        // List of saved reminders from ViewModel
         LazyColumn {
             items(viewModel.reminders) { reminder ->
                 Card(
@@ -68,8 +81,12 @@ fun ReminderScreen(
                             Text("Date: ${reminder.date}")
                             Text(reminder.description)
                         }
+
+                        // Delete reminder button
                         IconButton(onClick = {
                             viewModel.removeReminder(reminder)
+
+                            // Persist change to DataStore
                             coroutineScope.launch(Dispatchers.IO) {
                                 dataStore.saveCarData(
                                     viewModel.getCurrentProfile(),
@@ -85,36 +102,50 @@ fun ReminderScreen(
         }
     }
 
+    // Add Reminder Dialog
     if (openDialog) {
         AddReminderDialog(onDismiss = { openDialog = false }) { title, date, desc ->
             viewModel.addReminder(title, date, desc)
+
+            // Save updated data to persistence
             coroutineScope.launch(Dispatchers.IO) {
                 dataStore.saveCarData(viewModel.getCurrentProfile(), viewModel.reminders)
             }
+
             openDialog = false
         }
     }
 }
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddReminderDialog(
     onDismiss: () -> Unit,
     onAdd: (String, String, String) -> Unit
 ) {
+    // Dropdown list of reminder types
     val serviceTypes = listOf(
         "Oil Change", "Tire Rotation", "Brake Inspection",
         "Battery Replacement", "Annual Service", "Engine Tune-up",
         "Coolant / Fluids", "NCT Appointment"
     )
+
     var expanded by remember { mutableStateOf(false) }
     var selectedService by remember { mutableStateOf(serviceTypes.first()) }
+
     var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
+
     var desc by remember { mutableStateOf("") }
 
+    // Convert stored milliseconds to LocalDate to show in UI
     val dateText = remember(selectedDateMillis) {
         selectedDateMillis?.let { millis ->
-            Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate().toString()
+            Instant.ofEpochMilli(millis)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .toString()
         } ?: ""
     }
 
@@ -123,6 +154,8 @@ fun AddReminderDialog(
         title = { Text("Add Service Reminder") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+                // Service Type Dropdown
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = !expanded }
@@ -135,9 +168,12 @@ fun AddReminderDialog(
                         value = selectedService,
                         onValueChange = {},
                         label = { Text("Service Type") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                        },
                         colors = ExposedDropdownMenuDefaults.textFieldColors()
                     )
+
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
@@ -153,6 +189,8 @@ fun AddReminderDialog(
                         }
                     }
                 }
+
+                // Date picker display field
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     readOnly = true,
@@ -161,6 +199,8 @@ fun AddReminderDialog(
                     label = { Text("Service Date") },
                     placeholder = { Text("Select a date") },
                 )
+
+                // Overlay to trigger actual DatePicker dialog
                 Box(
                     modifier = Modifier
                         .offset(y = (-76).dp)
@@ -168,6 +208,8 @@ fun AddReminderDialog(
                         .fillMaxWidth()
                         .noIndicationClickable { showDatePicker = true }
                 )
+
+                // Description text field
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = desc,
@@ -176,21 +218,26 @@ fun AddReminderDialog(
                 )
             }
         },
+
+        // Confirm and save reminder
         confirmButton = {
             Button(
                 enabled = selectedDateMillis != null && selectedService.isNotEmpty(),
                 onClick = {
-                    val date = dateText
-                    onAdd(selectedService, date, desc)
+                    onAdd(selectedService, dateText, desc)
                 }
             ) { Text("Add") }
         },
+
         dismissButton = {
             OutlinedButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
+
+    // Material3 DatePicker dialog
     if (showDatePicker) {
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDateMillis)
+
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
             confirmButton = {

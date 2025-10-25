@@ -37,17 +37,28 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // ViewModel for managing and storing UI state
         val viewModel: CarViewModel by viewModels()
+
+        // DataStore instance for local persistence
         val dataStore = CarDataStore(applicationContext)
 
+        // Load any previously saved data when app opens
         CoroutineScope(Dispatchers.IO).launch {
             dataStore.loadData.collect { (car, reminders) ->
                 viewModel.loadFromDataStore(car, reminders)
             }
         }
-        enableEdgeToEdge()
+
+        enableEdgeToEdge() // Enables full screen UI
+
         setContent {
+
+            // Collect saved dark mode preference
             val darkMode by dataStore.darkModeEnabled.collectAsState(initial = false)
+
+            // Apply app theme based on darkMode setting
             CarMaintenanceAppTheme(darkTheme = darkMode) {
                 CarMaintenanceApp(viewModel = viewModel, dataStore = dataStore)
             }
@@ -57,7 +68,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
+
+    // Tracks the currently selected tab/screen
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+
+    // Bottom navigation bar setup
     NavigationSuiteScaffold(
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
@@ -70,18 +85,24 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
             }
         }
     ) {
+
+        // Screen content displayed below the nav bar
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
+                // Shows main dashboard info
                 AppDestinations.HOME -> HomeScreen(
                     modifier = Modifier.padding(innerPadding),
                     viewModel = viewModel
                 )
+
+                // Shows all service reminders
                 AppDestinations.REMINDERS -> ReminderScreen(
                     modifier = Modifier.padding(innerPadding),
                     viewModel = viewModel,
                     dataStore = dataStore
                 )
 
+                // Car profile + theme settings
                 AppDestinations.SETTINGS -> SettingsScreen(
                     modifier = Modifier.padding(innerPadding),
                     viewModel = viewModel,
@@ -92,6 +113,7 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
     }
 }
 
+// Defines the 3 navigation destinations in the bottom bar
 enum class AppDestinations(
     val label: String,
     val icon: ImageVector,

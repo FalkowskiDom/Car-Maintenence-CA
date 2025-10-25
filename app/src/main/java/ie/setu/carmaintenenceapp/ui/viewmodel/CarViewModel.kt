@@ -8,13 +8,18 @@ import ie.setu.carmaintenenceapp.data.CarProfile
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
+// Data class for storing individual reminders
 @Serializable
 data class ServiceReminder(
     val title: String,
     val date: String,
     val description: String
 )
+
 class CarViewModel : ViewModel() {
+
+    // State for car profile fields shown in the UI
     var carReg = mutableStateOf("")
     var carMileage = mutableIntStateOf(0)
     var carMake = mutableStateOf("")
@@ -25,9 +30,11 @@ class CarViewModel : ViewModel() {
     var engineSize = mutableStateOf("")
     var lastServiceDate = mutableStateOf("")
 
+    // Calculates next service mileage automatically
     val nextServiceMileage: Int
-    get() = carMileage.intValue + serviceInterval.intValue
+        get() = carMileage.intValue + serviceInterval.intValue
 
+    // Calculates the next expected service date (6 months later)
     val nextServiceDate: String
         get() = try {
             val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
@@ -36,14 +43,21 @@ class CarViewModel : ViewModel() {
         } catch (e: Exception) {
             "Not Set"
         }
+
+    // List of upcoming reminders stored in ViewModel
     var reminders = mutableStateListOf<ServiceReminder>()
+
+    // Adds a new reminder to the list
     fun addReminder(title: String, date: String, description: String) {
         reminders.add(ServiceReminder(title, date, description))
     }
 
+    // Removes a reminder when user presses delete
     fun removeReminder(reminder: ServiceReminder) {
         reminders.remove(reminder)
     }
+
+    // Updates all car profile values from SettingsScreen form
     fun updateCarProfile(
         reg: String,
         mileage: Int,
@@ -65,6 +79,8 @@ class CarViewModel : ViewModel() {
         this.engineType.value = engineType
         this.lastServiceDate.value = lastServiceDate
     }
+
+    // Loads saved data back into ViewModel from DataStore
     fun loadFromDataStore(profile: CarProfile?, reminders: List<ServiceReminder>) {
         if (profile != null) {
             carMake.value = profile.make
@@ -77,10 +93,13 @@ class CarViewModel : ViewModel() {
             serviceInterval.intValue = profile.serviceInterval
             lastServiceDate.value = profile.lastServiceDate
         }
+
+        // Clear and re-add reminders so Compose UI updates correctly
         this.reminders.clear()
         this.reminders.addAll(reminders)
     }
 
+    // Returns current car profile to save via DataStore
     fun getCurrentProfile(): CarProfile = CarProfile(
         make = carMake.value,
         model = carModel.value,
@@ -92,4 +111,4 @@ class CarViewModel : ViewModel() {
         serviceInterval = serviceInterval.intValue,
         lastServiceDate = lastServiceDate.value
     )
-    }
+}

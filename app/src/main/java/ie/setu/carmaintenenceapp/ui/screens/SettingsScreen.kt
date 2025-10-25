@@ -20,12 +20,19 @@ import java.util.Calendar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, dataStore: CarDataStore) {
+
     val coroutineScope = rememberCoroutineScope()
+
+    // Dark mode toggle state
     val darkMode by dataStore.darkModeEnabled.collectAsState(initial = false)
+
+    // Controls whether the bottom sheet edit form is visible
     var showEditSheet by remember { mutableStateOf(false) }
 
+    // Current saved car profile
     val car = viewModel.getCurrentProfile()
 
+    // Layout that contains the screen content and bottom bar for settings
     Scaffold(
         bottomBar = {
             Row(
@@ -36,6 +43,8 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, dataS
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Dark Mode", style = MaterialTheme.typography.bodyLarge)
+
+                // UI switch to enable/disable dark theme
                 Switch(
                     checked = darkMode,
                     onCheckedChange = { coroutineScope.launch { dataStore.setDarkMode(it) } },
@@ -47,6 +56,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, dataS
             }
         }
     ) { innerPadding ->
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)
@@ -56,6 +66,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, dataS
         ) {
             Text("Settings", style = MaterialTheme.typography.titleLarge)
 
+            // Card showing current car details
             Card(
                 colors = CardDefaults.cardColors(MaterialTheme.colorScheme.secondaryContainer),
                 modifier = Modifier.fillMaxWidth()
@@ -67,7 +78,10 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, dataS
                     Text("Engine: ${car.engineType} ${car.engineSize}")
                     Text("Next Service: every ${car.serviceInterval} km")
                     Text("Last Serviced: ${car.lastServiceDate}")
+
                     Spacer(Modifier.height(12.dp))
+
+                    // Opens the editable sheet for car changes
                     Button(
                         onClick = { showEditSheet = true },
                         modifier = Modifier.fillMaxWidth()
@@ -77,6 +91,7 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, dataS
         }
     }
 
+    // Shows bottom sheet only when editing
     if (showEditSheet) {
         ModalBottomSheet(
             onDismissRequest = { showEditSheet = false },
@@ -93,7 +108,10 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, dataS
 
 @Composable
 fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () -> Unit) {
+
     val coroutineScope = rememberCoroutineScope()
+
+    // Temporary state holders for user edits
     var make by remember { mutableStateOf(viewModel.carMake.value) }
     var model by remember { mutableStateOf(viewModel.carModel.value) }
     var reg by remember { mutableStateOf(viewModel.carReg.value) }
@@ -103,12 +121,16 @@ fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () ->
     var engineSize by remember { mutableStateOf(viewModel.engineSize.value) }
     var serviceInterval by remember { mutableStateOf(viewModel.serviceInterval.intValue.toString()) }
     var lastServiceDate by remember { mutableStateOf(viewModel.lastServiceDate.value) }
+
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
+
+    // Current calendar date for initializing picker
     val yearNow = calendar.get(Calendar.YEAR)
     val monthNow = calendar.get(Calendar.MONTH)
     val dayNow = calendar.get(Calendar.DAY_OF_MONTH)
 
+    // Opens native Android date picker
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
@@ -117,6 +139,7 @@ fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () ->
         yearNow, monthNow, dayNow
     )
 
+    // Form list in scrollable container
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -126,54 +149,41 @@ fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () ->
         item {
             Text("Edit Car Profile", style = MaterialTheme.typography.titleMedium)
         }
+
         item {
-            OutlinedTextField(
-                value = make,
-                onValueChange = { make = it },
-                label = { Text("Make") },
-                modifier = Modifier.fillMaxWidth())
-
-            OutlinedTextField(value = model,
-                onValueChange = { model = it },
-                label = { Text("Model") },
-                modifier = Modifier.fillMaxWidth())
-
-            OutlinedTextField(value = reg,
-                onValueChange = { reg = it },
-                label = { Text("Registration") },
-                modifier = Modifier.fillMaxWidth())
+            // Inputs for each stored property
+            OutlinedTextField(make, { make = it }, label = { Text("Make") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(model, { model = it }, label = { Text("Model") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(reg, { reg = it }, label = { Text("Registration") }, modifier = Modifier.fillMaxWidth())
 
             OutlinedTextField(
-                value = mileage,
-                onValueChange = { mileage = it },
+                mileage,
+                { mileage = it },
                 label = { Text("Mileage") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
+
             OutlinedTextField(
-                value = year,
-                onValueChange = { year = it },
+                year,
+                { year = it },
                 label = { Text("Year") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(value = engineType,
-                onValueChange = { engineType = it },
-                label = { Text("Engine Type") },
-                modifier = Modifier.fillMaxWidth())
 
-            OutlinedTextField(value = engineSize,
-                onValueChange = { engineSize = it },
-                label = { Text("Engine Size") },
-                modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(engineType, { engineType = it }, label = { Text("Engine Type") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(engineSize, { engineSize = it }, label = { Text("Engine Size") }, modifier = Modifier.fillMaxWidth())
 
             OutlinedTextField(
-                value = serviceInterval,
-                onValueChange = { serviceInterval = it },
+                serviceInterval,
+                { serviceInterval = it },
                 label = { Text("Service Interval (km)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Triggers the date picker
             OutlinedTextField(
                 value = lastServiceDate,
                 onValueChange = {},
@@ -189,13 +199,14 @@ fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () ->
                 )
             )
 
-
             Spacer(Modifier.height(16.dp))
+
+            // Save changes and persist to DataStore
             Button(
                 onClick = {
                     viewModel.updateCarProfile(
                         reg = reg,
-                        mileage = mileage.toIntOrNull() ?:0,
+                        mileage = mileage.toIntOrNull() ?: 0,
                         make = make,
                         model = model,
                         year = year.toIntOrNull() ?: 2010,
@@ -204,9 +215,11 @@ fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () ->
                         engineSize = engineSize,
                         lastServiceDate = lastServiceDate
                     )
+
                     coroutineScope.launch {
                         dataStore.saveCarData(viewModel.getCurrentProfile(), viewModel.reminders)
                     }
+
                     onClose()
                 },
                 modifier = Modifier.fillMaxWidth()
