@@ -12,6 +12,10 @@ import androidx.compose.ui.unit.dp
 import ie.setu.carmaintenenceapp.data.CarDataStore
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 import kotlinx.coroutines.launch
+import android.app.DatePickerDialog
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalContext
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,6 +103,19 @@ fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () ->
     var engineSize by remember { mutableStateOf(viewModel.engineSize.value) }
     var serviceInterval by remember { mutableStateOf(viewModel.serviceInterval.intValue.toString()) }
     var lastServiceDate by remember { mutableStateOf(viewModel.lastServiceDate.value) }
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+    val yearNow = calendar.get(Calendar.YEAR)
+    val monthNow = calendar.get(Calendar.MONTH)
+    val dayNow = calendar.get(Calendar.DAY_OF_MONTH)
+
+    val datePickerDialog = DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            lastServiceDate = "$dayOfMonth/${month + 1}/$year"
+        },
+        yearNow, monthNow, dayNow
+    )
 
     LazyColumn(
         modifier = Modifier
@@ -157,20 +174,31 @@ fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () ->
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )
-            OutlinedTextField(value = lastServiceDate,
-                onValueChange = { lastServiceDate = it },
+            OutlinedTextField(
+                value = lastServiceDate,
+                onValueChange = {},
                 label = { Text("Last Service Date") },
-                modifier = Modifier.fillMaxWidth())
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { datePickerDialog.show() },
+                enabled = false,
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+
 
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = {
                     viewModel.updateCarProfile(
                         reg = reg,
-                        mileage = mileage.toIntOrNull() ?: 0,
+                        mileage = mileage.toIntOrNull() ?:0,
                         make = make,
                         model = model,
-                        year = year.toIntOrNull() ?: 0,
+                        year = year.toIntOrNull() ?: 2010,
                         interval = serviceInterval.toIntOrNull() ?: 10000,
                         engineType = engineType,
                         engineSize = engineSize,
