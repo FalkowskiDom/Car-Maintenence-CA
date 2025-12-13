@@ -19,6 +19,9 @@ foundationLayout = "1.9.3"
 foundation = "1.9.4"
 material3AdaptiveNavigationSuite = "1.4.0"
 material3AdaptiveNavigationSuiteAndroid = "1.4.0"
+media3Exoplayer = "1.8.0"
+media3Ui = "1.8.0"
+androidxFoundationLayout = "1.10.0"
 
 [libraries]
 androidx-compose-adaptive-navigation-suite = { module = "androidx.compose.material3.adaptive:adaptive-navigation-suite", version.ref = "adaptiveNavigationSuite" }
@@ -31,6 +34,8 @@ androidx-datastore-preferences-v111 = { module = "androidx.datastore:datastore-p
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
 androidx-lifecycle-viewmodel-compose-v280 = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+androidx-media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Exoplayer" }
+androidx-media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Ui" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -51,6 +56,7 @@ kotlinx-serialization-json-v163 = { module = "org.jetbrains.kotlinx:kotlinx-seri
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
+androidx-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "androidxFoundationLayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

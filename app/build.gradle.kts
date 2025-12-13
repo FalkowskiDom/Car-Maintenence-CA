@@ -58,6 +58,9 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite.android)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.foundation.layout)
 
 
     // Test dependencies
