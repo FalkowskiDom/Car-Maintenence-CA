@@ -28,6 +28,7 @@ import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
 import ie.setu.carmaintenenceapp.ui.screens.ReminderScreen
 import ie.setu.carmaintenenceapp.ui.screens.SettingsScreen
 import ie.setu.carmaintenenceapp.data.CarDataStore
+import ie.setu.carmaintenenceapp.ui.screens.SignUpScreen
 import ie.setu.carmaintenenceapp.ui.theme.CarMaintenanceAppTheme
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -61,15 +62,31 @@ class MainActivity : ComponentActivity() {
             val userName = "Dominik" //hardcode for now just for testing
 
             var showSplash by rememberSaveable { mutableStateOf(true) }
+            var showSignUp by rememberSaveable { mutableStateOf(false) }
+
 
             // Apply app theme based on darkMode setting
             CarMaintenanceAppTheme(darkTheme = darkMode) {
                 if (showSplash) {
                     ie.setu.carmaintenenceapp.ui.screens.SplashScreen(
                         userName = userName,
-                        onTimeout = { showSplash = false }
+                        onTimeout = {
+                            showSplash = false
+                            showSignUp = true
+                        }
                     )
-                } else {
+                } else if (showSignUp) {
+                SignUpScreen(
+                    onSignUpClick = { email, password ->
+                        // Handle sign-up logic
+                        showSignUp = false
+                    },
+                    onLoginClick = {
+                        // Navigate to login screen
+                        showSignUp = false
+                    }
+                )
+            } else {
                 CarMaintenanceApp(viewModel = viewModel, dataStore = dataStore)
             }
         }

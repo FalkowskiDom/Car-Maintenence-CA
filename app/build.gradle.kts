@@ -61,10 +61,12 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.foundation.layout)
+    implementation(libs.androidx.media3.common)
 
 
     // Test dependencies
     testImplementation(libs.junit)
+    implementation(libs.androidx.core.ktx.v1120)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
