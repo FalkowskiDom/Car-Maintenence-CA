@@ -28,6 +28,7 @@ import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
 import ie.setu.carmaintenenceapp.ui.screens.ReminderScreen
 import ie.setu.carmaintenenceapp.ui.screens.SettingsScreen
 import ie.setu.carmaintenenceapp.data.CarDataStore
+import ie.setu.carmaintenenceapp.ui.screens.LoginScreen
 import ie.setu.carmaintenenceapp.ui.screens.SignUpScreen
 import ie.setu.carmaintenenceapp.ui.theme.CarMaintenanceAppTheme
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
@@ -86,6 +87,14 @@ class MainActivity : ComponentActivity() {
                         showSignUp = false
                     }
                 )
+//                    LoginScreen(
+//                        onLoginClick = { email, password ->
+//                            // do login
+//                        },
+//                        onSignUpClick = {
+//                            // switch state to SignUp screen
+//                        }
+//                    )
             } else {
                 CarMaintenanceApp(viewModel = viewModel, dataStore = dataStore)
             }
