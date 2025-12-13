@@ -1,5 +1,6 @@
 [versions]
-agp = "8.13.0"
+adaptiveNavigationSuite = "1.0.0"
+agp = "8.13.2"
 datastorePreferences = "1.1.7"
 datastorePreferencesVersion = "1.1.1"
 foundationLayoutVersion = "1.7.4"
@@ -16,10 +17,14 @@ composeBom = "2025.10.00"
 lifecycleViewmodelCompose = "2.8.0"
 foundationLayout = "1.9.3"
 foundation = "1.9.4"
+material3AdaptiveNavigationSuite = "1.4.0"
+material3AdaptiveNavigationSuiteAndroid = "1.4.0"
 
 [libraries]
+androidx-compose-adaptive-navigation-suite = { module = "androidx.compose.material3.adaptive:adaptive-navigation-suite", version.ref = "adaptiveNavigationSuite" }
 androidx-compose-foundation-layout-v174 = { module = "androidx.compose.foundation:foundation-layout", version.ref = "foundationLayoutVersion" }
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
+androidx-compose-material3-adaptive-navigation-suite-android = { module = "androidx.compose.material3:material3-adaptive-navigation-suite-android", version.ref = "material3AdaptiveNavigationSuiteAndroid" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-datastore-preferences-v111 = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferencesVersion" }
@@ -45,6 +50,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-json-v163 = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJsonVersion" }
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

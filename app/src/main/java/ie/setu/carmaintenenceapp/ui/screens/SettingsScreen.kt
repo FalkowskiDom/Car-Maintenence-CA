@@ -159,7 +159,7 @@ fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () ->
             OutlinedTextField(
                 mileage,
                 { mileage = it },
-                label = { Text("Mileage") },
+                label = { Text("Mileage (km)") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
             )

@@ -58,8 +58,18 @@ class MainActivity : ComponentActivity() {
             // Collect saved dark mode preference
             val darkMode by dataStore.darkModeEnabled.collectAsState(initial = false)
 
+            val userName = "Dominik" //hardcode for now just for testing
+
+            var showSplash by rememberSaveable { mutableStateOf(true) }
+
             // Apply app theme based on darkMode setting
             CarMaintenanceAppTheme(darkTheme = darkMode) {
+                if (showSplash) {
+                    ie.setu.carmaintenenceapp.ui.screens.SplashScreen(
+                        userName = userName,
+                        onTimeout = { showSplash = false }
+                    )
+                } else {
                 CarMaintenanceApp(viewModel = viewModel, dataStore = dataStore)
             }
         }
@@ -138,4 +148,4 @@ fun GreetingPreview() {
     CarMaintenanceAppTheme {
         Greeting("Android")
     }
-}
+}}
