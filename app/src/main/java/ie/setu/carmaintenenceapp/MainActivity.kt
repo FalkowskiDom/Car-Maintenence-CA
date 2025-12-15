@@ -16,9 +16,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -30,6 +32,7 @@ import ie.setu.carmaintenenceapp.ui.screens.LoginScreen
 import ie.setu.carmaintenenceapp.ui.screens.ReminderScreen
 import ie.setu.carmaintenenceapp.ui.screens.SettingsScreen
 import ie.setu.carmaintenenceapp.ui.screens.SignUpScreen
+import ie.setu.carmaintenenceapp.ui.screens.SplashScreen
 import ie.setu.carmaintenenceapp.ui.theme.CarMaintenanceAppTheme
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -61,18 +64,32 @@ class MainActivity : ComponentActivity() {
             // Collect saved dark mode preference
             val darkMode by dataStore.darkModeEnabled.collectAsState(initial = false)
 
-            val userName = "Dominik" //hardcode for now just for testing
+            var loadingSession by remember { mutableStateOf(true) }
+            var sessionUserName by rememberSaveable { mutableStateOf("") }
 
             var showSplash by rememberSaveable { mutableStateOf(true) }
             var inApp by rememberSaveable { mutableStateOf(false) }
             var authIsLogin by rememberSaveable { mutableStateOf(true) }
 
+            LaunchedEffect(Unit) {
+                val session = authStore.getSession()
+                if (session != null) {
+                    sessionUserName = session.username
+                    inApp = true // user stays logged in
+                }
+                loadingSession = false
+            }
+            val userName = if (sessionUserName.isNotBlank()) sessionUserName else "User"
             // Apply app theme based on darkMode setting
             CarMaintenanceAppTheme(darkTheme = darkMode) {
+                if (loadingSession){
+                    Text("Loading...")
+                    return@CarMaintenanceAppTheme
+                }
                 // The 'when' statement handles the navigation flow: Splash -> Auth -> Main App
                 when {
                     showSplash -> {
-                        ie.setu.carmaintenenceapp.ui.screens.SplashScreen(
+                        SplashScreen(
                             userName = userName,
                             onTimeout = {
                                 showSplash = false
@@ -88,7 +105,10 @@ class MainActivity : ComponentActivity() {
                         // Show the login screen
                         LoginScreen(
                             authStore = authStore,
-                            onLoginSuccess = { inApp = true },
+                            onLoginSuccess = {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    sessionUserName = authStore.getSession()?.username.orEmpty()
+                                    inApp = true } },
                             onSignUpClick = { authIsLogin = false }, // Switch to sign-up screen
                             onBypassClick = { inApp = true } // For testing
                         )
@@ -97,7 +117,9 @@ class MainActivity : ComponentActivity() {
                         // Show the sign-up screen
                         SignUpScreen(
                             authStore = authStore,
-                            onSignUpSuccess = { inApp = true },
+                            onSignUpSuccess = { CoroutineScope(Dispatchers.Main).launch {
+                                sessionUserName = authStore.getSession()?.username.orEmpty()
+                                inApp = true }},
                             onLoginClick = { authIsLogin = true } // Switch back to login screen
                         )
                     }

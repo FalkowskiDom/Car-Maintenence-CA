@@ -10,9 +10,14 @@ import java.io.File
 @Serializable
 data class UserAccount(
     val email: String,
-    val password: String
+    val password: String,
+    val username: String
 )
-
+@Serializable
+data class SessionFile(
+    val email: String,
+    val username: String
+)
 @Serializable
 data class UsersFile(
     val users: List<UserAccount> = emptyList()
@@ -20,7 +25,9 @@ data class UsersFile(
 
 class AuthStore(private val context: Context) {
 
-    private val file = File(context.filesDir, "users.json")
+    private val usersFile = File(context.filesDir, "users.json")
+    private val sessionFile = File(context.filesDir, "session.json")
+
 
     private val json = Json {
         prettyPrint = true
@@ -28,18 +35,32 @@ class AuthStore(private val context: Context) {
     }
 
     private suspend fun readUsers(): UsersFile = withContext(Dispatchers.IO) {
-        if (!file.exists()) return@withContext UsersFile()
-        val text = file.readText()
+        if (!usersFile.exists()) return@withContext UsersFile()
+        val text = usersFile.readText()
         if (text.isBlank()) UsersFile()
         else json.decodeFromString(text)
     }
 
-    private suspend fun writeUsers(usersFile: UsersFile) = withContext(Dispatchers.IO) {
-        file.writeText(json.encodeToString(usersFile))
+    private suspend fun writeSession(session: SessionFile) = withContext(Dispatchers.IO) {
+        sessionFile.writeText(json.encodeToString(session))
+    }
+    private suspend fun writeUsers(users: UsersFile) = withContext(Dispatchers.IO) {
+        usersFile.writeText(json.encodeToString(users))
     }
 
-    suspend fun signUp(emailRaw: String, password: String): Result<Unit> {
+    suspend fun getSession(): SessionFile? = withContext(Dispatchers.IO) {
+        if (!sessionFile.exists()) return@withContext null
+        val text = sessionFile.readText()
+        if (text.isBlank()) null else runCatching { json.decodeFromString<SessionFile>(text) }.getOrNull()
+    }
+
+    suspend fun clearSession() = withContext(Dispatchers.IO) {
+        if (sessionFile.exists()) sessionFile.delete()
+    }
+
+    suspend fun signUp(emailRaw: String, password: String, usernameRaw: String): Result<Unit> {
         val email = emailRaw.trim().lowercase()
+        val username = usernameRaw.trim()
 
         if (email.isBlank() || password.isBlank()) {
             return Result.failure(IllegalArgumentException("Email and password required"))
@@ -52,10 +73,11 @@ class AuthStore(private val context: Context) {
         }
 
         val updated = current.copy(
-            users = current.users + UserAccount(email, password)
+            users = current.users + UserAccount(email, password, username)
         )
 
         writeUsers(updated)
+        writeSession(SessionFile(email = email, username = username))
         return Result.success(Unit)
     }
 
@@ -66,6 +88,7 @@ class AuthStore(private val context: Context) {
         val user = current.users.firstOrNull { it.email == email }
 
         return if (user != null && user.password == password) {
+            writeSession(SessionFile(email = user.email, username = user.username))
             Result.success(Unit)
         } else {
             Result.failure(IllegalArgumentException("Invalid email or password"))

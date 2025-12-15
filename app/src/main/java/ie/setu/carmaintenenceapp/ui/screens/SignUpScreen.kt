@@ -22,6 +22,7 @@ fun SignUpScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    var username by remember { mutableStateOf("") }
 
 
     Column(
@@ -42,6 +43,12 @@ fun SignUpScreen(
             Spacer(Modifier.height(8.dp))
         }
 
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it; error = null },
+            label = { Text("Username") },
+            modifier = Modifier.fillMaxWidth()
+        )
         OutlinedTextField(
             value = email,
             onValueChange = { email = it; error = null },
@@ -67,11 +74,11 @@ fun SignUpScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            enabled = !loading && password == confirmPassword && password.isNotEmpty(),
+            enabled = !loading && password == confirmPassword && password.isNotEmpty() && username.isNotEmpty(),
             onClick = {
                 loading = true
                 scope.launch {
-                    val result = authStore.signUp(email, password)
+                    val result = authStore.signUp(email, password, username)
                     loading = false
 
                     result.onSuccess { onSignUpSuccess() }
