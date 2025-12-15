@@ -12,7 +12,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
-    onSignUpClick: () -> Unit
+    onSignUpClick: () -> Unit,
+    onBypassClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -24,6 +25,9 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text("Welcome Back", style = MaterialTheme.typography.headlineMedium)
+        Spacer(modifier = Modifier.height(12.dp))
+
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -48,6 +52,13 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Login")
+        }
+        //this part is for testing purposes
+        OutlinedButton(
+            onClick = onBypassClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Bypass")
         }
 
         TextButton(onClick = onSignUpClick) {

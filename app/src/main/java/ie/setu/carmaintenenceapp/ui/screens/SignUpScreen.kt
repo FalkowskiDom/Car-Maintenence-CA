@@ -24,6 +24,12 @@ fun SignUpScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(
+            text = "Sign Up",
+            style = MaterialTheme.typography.headlineMedium,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },

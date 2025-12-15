@@ -24,11 +24,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import ie.setu.carmaintenenceapp.data.CarDataStore
 import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
+import ie.setu.carmaintenenceapp.ui.screens.LoginScreen
 import ie.setu.carmaintenenceapp.ui.screens.ReminderScreen
 import ie.setu.carmaintenenceapp.ui.screens.SettingsScreen
-import ie.setu.carmaintenenceapp.data.CarDataStore
-import ie.setu.carmaintenenceapp.ui.screens.LoginScreen
 import ie.setu.carmaintenenceapp.ui.screens.SignUpScreen
 import ie.setu.carmaintenenceapp.ui.theme.CarMaintenanceAppTheme
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
@@ -56,50 +56,72 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge() // Enables full screen UI
 
         setContent {
-
             // Collect saved dark mode preference
             val darkMode by dataStore.darkModeEnabled.collectAsState(initial = false)
 
             val userName = "Dominik" //hardcode for now just for testing
 
             var showSplash by rememberSaveable { mutableStateOf(true) }
-            var showSignUp by rememberSaveable { mutableStateOf(false) }
-
+            var inApp by rememberSaveable { mutableStateOf(false) }
+            var authIsLogin by rememberSaveable { mutableStateOf(true) }
 
             // Apply app theme based on darkMode setting
             CarMaintenanceAppTheme(darkTheme = darkMode) {
-                if (showSplash) {
-                    ie.setu.carmaintenenceapp.ui.screens.SplashScreen(
-                        userName = userName,
-                        onTimeout = {
-                            showSplash = false
-                            showSignUp = true
-                        }
-                    )
-                } else if (showSignUp) {
-                SignUpScreen(
-                    onSignUpClick = { email, password ->
-                        // Handle sign-up logic
-                        showSignUp = false
-                    },
-                    onLoginClick = {
-                        // Navigate to login screen
-                        showSignUp = false
+                when {
+                    showSplash -> {
+                        ie.setu.carmaintenenceapp.ui.screens.SplashScreen(
+                            userName = userName,
+                            onTimeout = {
+                                showSplash = false
+                                authIsLogin = true
+                            }
+                        )
                     }
-                )
-//                    LoginScreen(
-//                        onLoginClick = { email, password ->
-//                            // do login
-//                        },
-//                        onSignUpClick = {
-//                            // switch state to SignUp screen
-//                        }
-//                    )
-            } else {
-                CarMaintenanceApp(viewModel = viewModel, dataStore = dataStore)
+                    inApp -> {
+                        CarMaintenanceApp(viewModel = viewModel, dataStore = dataStore)
+                    }
+
+                    authIsLogin -> {
+                        LoginScreen(
+                            onLoginClick = { email, password ->
+                                // TODO real login later
+                                inApp = true
+                            },
+                            onSignUpClick = {
+                                authIsLogin = false
+                            },
+                            onBypassClick = {
+                                // testing shortcut
+                                inApp = true
+                            }
+                        )
+                    }
+
+                    else -> {
+                        SignUpScreen(
+                            onSignUpClick = { email, password ->
+                                // TODO real sign up later
+                                inApp = true
+                            },
+                            onLoginClick = {
+                                authIsLogin = true
+                            }
+                        )
+                    }
+                }
             }
         }
     }
+}
+
+// Defines the 3 navigation destinations in the bottom bar
+enum class AppDestinations(
+    val label: String,
+    val icon: ImageVector,
+) {
+    HOME("Home", Icons.Default.Home),
+    REMINDERS("Reminders", Icons.Default.Favorite),
+    SETTINGS("Settings", Icons.Default.AccountBox),
 }
 
 @Composable
@@ -121,7 +143,6 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
             }
         }
     ) {
-
         // Screen content displayed below the nav bar
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
@@ -130,14 +151,12 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
                     modifier = Modifier.padding(innerPadding),
                     viewModel = viewModel
                 )
-
                 // Shows all service reminders
                 AppDestinations.REMINDERS -> ReminderScreen(
                     modifier = Modifier.padding(innerPadding),
                     viewModel = viewModel,
                     dataStore = dataStore
                 )
-
                 // Car profile + theme settings
                 AppDestinations.SETTINGS -> SettingsScreen(
                     modifier = Modifier.padding(innerPadding),
@@ -148,17 +167,6 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
         }
     }
 }
-
-// Defines the 3 navigation destinations in the bottom bar
-enum class AppDestinations(
-    val label: String,
-    val icon: ImageVector,
-) {
-    HOME("Home", Icons.Default.Home),
-    REMINDERS("Reminders", Icons.Default.Favorite),
-    SETTINGS("Settings", Icons.Default.AccountBox),
-}
-
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
@@ -174,4 +182,4 @@ fun GreetingPreview() {
     CarMaintenanceAppTheme {
         Greeting("Android")
     }
-}}
+}
