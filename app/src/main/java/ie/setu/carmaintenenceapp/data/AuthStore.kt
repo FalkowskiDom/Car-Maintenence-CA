@@ -4,8 +4,6 @@ import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.File
 
@@ -41,12 +39,36 @@ class AuthStore(private val context: Context) {
     }
 
     suspend fun signUp(emailRaw: String, password: String): Result<Unit> {
+        val email = emailRaw.trim().lowercase()
 
-        return TODO("Provide the return value")
+        if (email.isBlank() || password.isBlank()) {
+            return Result.failure(IllegalArgumentException("Email and password required"))
+        }
+
+        val current = readUsers()
+
+        if (current.users.any { it.email == email }) {
+            return Result.failure(IllegalStateException("User already exists"))
+        }
+
+        val updated = current.copy(
+            users = current.users + UserAccount(email, password)
+        )
+
+        writeUsers(updated)
+        return Result.success(Unit)
     }
 
     suspend fun login(emailRaw: String, password: String): Result<Unit> {
+        val email = emailRaw.trim().lowercase()
 
-        return TODO("Provide the return value")
+        val current = readUsers()
+        val user = current.users.firstOrNull { it.email == email }
+
+        return if (user != null && user.password == password) {
+            Result.success(Unit)
+        } else {
+            Result.failure(IllegalArgumentException("Invalid email or password"))
+        }
     }
 }

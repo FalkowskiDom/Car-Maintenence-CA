@@ -23,7 +23,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import ie.setu.carmaintenenceapp.data.AuthStore
 import ie.setu.carmaintenenceapp.data.CarDataStore
 import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
