@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
+import ie.setu.carmaintenenceapp.data.AuthStore
 import ie.setu.carmaintenenceapp.data.CarDataStore
 import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
 import ie.setu.carmaintenenceapp.ui.screens.LoginScreen
@@ -42,6 +43,8 @@ class MainActivity : ComponentActivity() {
 
         // ViewModel for managing and storing UI state
         val viewModel: CarViewModel by viewModels()
+
+        val authStore = AuthStore(applicationContext)
 
         // DataStore instance for local persistence
         val dataStore = CarDataStore(applicationContext)
@@ -67,45 +70,36 @@ class MainActivity : ComponentActivity() {
 
             // Apply app theme based on darkMode setting
             CarMaintenanceAppTheme(darkTheme = darkMode) {
+                // The 'when' statement handles the navigation flow: Splash -> Auth -> Main App
                 when {
                     showSplash -> {
                         ie.setu.carmaintenenceapp.ui.screens.SplashScreen(
                             userName = userName,
                             onTimeout = {
                                 showSplash = false
-                                authIsLogin = true
+                                authIsLogin = true // Default to login screen after splash
                             }
                         )
                     }
                     inApp -> {
+                        // Once authenticated, show the main app content
                         CarMaintenanceApp(viewModel = viewModel, dataStore = dataStore)
                     }
-
                     authIsLogin -> {
+                        // Show the login screen
                         LoginScreen(
-                            onLoginClick = { email, password ->
-                                // TODO real login later
-                                inApp = true
-                            },
-                            onSignUpClick = {
-                                authIsLogin = false
-                            },
-                            onBypassClick = {
-                                // testing shortcut
-                                inApp = true
-                            }
+                            authStore = authStore,
+                            onLoginSuccess = { inApp = true },
+                            onSignUpClick = { authIsLogin = false }, // Switch to sign-up screen
+                            onBypassClick = { inApp = true } // For testing
                         )
                     }
-
                     else -> {
+                        // Show the sign-up screen
                         SignUpScreen(
-                            onSignUpClick = { email, password ->
-                                // TODO real sign up later
-                                inApp = true
-                            },
-                            onLoginClick = {
-                                authIsLogin = true
-                            }
+                            authStore = authStore,
+                            onSignUpSuccess = { inApp = true },
+                            onLoginClick = { authIsLogin = true } // Switch back to login screen
                         )
                     }
                 }
@@ -133,17 +127,17 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
     // Bottom navigation bar setup
     NavigationSuiteScaffold(
         navigationSuiteItems = {
-            AppDestinations.entries.forEach {
+            AppDestinations.entries.forEach { destination ->
                 item(
-                    icon = { Icon(it.icon, contentDescription = it.label) },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
+                    icon = { Icon(destination.icon, contentDescription = destination.label) },
+                    label = { Text(destination.label) },
+                    selected = destination == currentDestination,
+                    onClick = { currentDestination = destination }
                 )
             }
         }
     ) {
-        // Screen content displayed below the nav bar
+        // Screen content displayed based on the selected destination
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
                 // Shows main dashboard info
@@ -165,21 +159,5 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CarMaintenanceAppTheme {
-        Greeting("Android")
     }
 }

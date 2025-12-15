@@ -8,15 +8,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import ie.setu.carmaintenenceapp.data.AuthStore
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    onLoginClick: (String, String) -> Unit,
+    authStore: AuthStore,
+    onLoginSuccess: () -> Unit,
     onSignUpClick: () -> Unit,
     onBypassClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -27,6 +33,12 @@ fun LoginScreen(
     ) {
         Text("Welcome Back", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(12.dp))
+
+        if (error != null) {
+            Text(error!!, color = MaterialTheme.colorScheme.error)
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
 
         OutlinedTextField(
             value = email,
@@ -48,7 +60,17 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { onLoginClick(email, password) },
+            enabled = !loading,
+            onClick = {
+                loading = true
+                scope.launch {
+                    val result = authStore.login(email, password)
+                    loading = false
+
+                    result.onSuccess { onLoginSuccess() }
+                        .onFailure { error = it.message ?: "Login failed" }
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Login")
