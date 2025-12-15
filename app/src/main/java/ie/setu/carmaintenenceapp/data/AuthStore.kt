@@ -36,9 +36,12 @@ class AuthStore(private val context: Context) {
 
     private suspend fun readUsers(): UsersFile = withContext(Dispatchers.IO) {
         if (!usersFile.exists()) return@withContext UsersFile()
+
         val text = usersFile.readText()
-        if (text.isBlank()) UsersFile()
-        else json.decodeFromString(text)
+        if (text.isBlank()) return@withContext UsersFile()
+
+        runCatching { json.decodeFromString<UsersFile>(text) }
+            .getOrElse { UsersFile() }
     }
 
     private suspend fun writeSession(session: SessionFile) = withContext(Dispatchers.IO) {
@@ -50,8 +53,12 @@ class AuthStore(private val context: Context) {
 
     suspend fun getSession(): SessionFile? = withContext(Dispatchers.IO) {
         if (!sessionFile.exists()) return@withContext null
+
         val text = sessionFile.readText()
-        if (text.isBlank()) null else runCatching { json.decodeFromString<SessionFile>(text) }.getOrNull()
+        if (text.isBlank()) return@withContext null
+
+        runCatching { json.decodeFromString<SessionFile>(text) }
+            .getOrNull()
     }
 
     suspend fun clearSession() = withContext(Dispatchers.IO) {
