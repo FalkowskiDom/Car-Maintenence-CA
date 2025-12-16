@@ -100,7 +100,17 @@ class MainActivity : ComponentActivity() {
                     }
                     inApp -> {
                         // Once authenticated, show the main app content
-                        CarMaintenanceApp(viewModel = viewModel, dataStore = dataStore)
+                        CarMaintenanceApp(
+                            viewModel = viewModel,
+                            dataStore = dataStore,
+                            authStore = authStore,
+                            onLoggedOut = {
+                                inApp = false
+                                authIsLogin = true
+                                sessionUserName = ""
+                                showSplash = false
+                            }
+                        )
                     }
                     authIsLogin -> {
                         // Show the login screen
@@ -143,7 +153,12 @@ enum class AppDestinations(
 }
 
 @Composable
-fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
+fun CarMaintenanceApp(
+    viewModel: CarViewModel,
+    dataStore: CarDataStore,
+    authStore: AuthStore,
+    onLoggedOut: () -> Unit
+) {
 
     // Tracks the currently selected tab/screen
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
@@ -180,8 +195,10 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
                     modifier = Modifier.padding(innerPadding),
                     viewModel = viewModel,
                     dataStore = dataStore,
-                    authStore = AuthStore(LocalContext.current),
-                    onLoggedOut = { currentDestination = AppDestinations.HOME }
+                    authStore = authStore,
+                    onLoggedOut = { currentDestination = AppDestinations.HOME
+                    onLoggedOut()
+                    }
                 )
             }
         }
