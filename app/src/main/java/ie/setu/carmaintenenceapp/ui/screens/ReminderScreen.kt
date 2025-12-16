@@ -13,7 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ie.setu.carmaintenenceapp.data.CarDataStore
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
-import kotlinx.coroutines.CoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import ie.setu.carmaintenenceapp.notifications.ReminderScheduler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -42,6 +43,7 @@ fun ReminderScreen(
 
     val coroutineScope = rememberCoroutineScope()
     var reminderToDelete by remember { mutableStateOf<ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder?>(null) }
+    val context = LocalContext.current
 
 
     Column(
@@ -138,7 +140,9 @@ fun ReminderScreen(
     // Add Reminder Dialog
     if (openDialog) {
         AddReminderDialog(onDismiss = { openDialog = false }) { title, date, desc ->
-            viewModel.addReminder(title, date, desc)
+            val created = viewModel.addReminder(title, date, desc)
+            ReminderScheduler.schedule(context, created)
+
 
             // Save updated data to persistence
             coroutineScope.launch(Dispatchers.IO) {

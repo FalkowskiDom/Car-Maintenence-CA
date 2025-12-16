@@ -35,6 +35,7 @@ import ie.setu.carmaintenenceapp.ui.screens.SettingsScreen
 import ie.setu.carmaintenenceapp.ui.screens.SignUpScreen
 import ie.setu.carmaintenenceapp.ui.screens.SplashScreen
 import ie.setu.carmaintenenceapp.ui.theme.CarMaintenanceAppTheme
+import ie.setu.carmaintenenceapp.notifications.NotificationHelper
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +52,7 @@ class MainActivity : ComponentActivity() {
 
         // DataStore instance for local persistence
         val dataStore = CarDataStore(applicationContext)
+        NotificationHelper.createChannel(this)
 
         // Load any previously saved data when app opens
         CoroutineScope(Dispatchers.IO).launch {

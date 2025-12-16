@@ -26,6 +26,7 @@ media3ExoplayerVersion = "1.2.1"
 media3Ui = "1.8.0"
 androidxFoundationLayout = "1.10.0"
 media3UiVersion = "1.2.1"
+workRuntimeKtx = "2.11.0"
 
 [libraries]
 androidx-compose-adaptive-navigation-suite = { module = "androidx.compose.material3.adaptive:adaptive-navigation-suite", version.ref = "adaptiveNavigationSuite" }
@@ -65,6 +66,7 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 androidx-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavigationSuite" }
 androidx-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "androidxFoundationLayout" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
