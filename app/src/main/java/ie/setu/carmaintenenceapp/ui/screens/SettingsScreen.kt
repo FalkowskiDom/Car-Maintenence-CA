@@ -25,7 +25,8 @@ fun SettingsScreen(
     viewModel: CarViewModel,
     dataStore: CarDataStore,
     authStore: AuthStore,
-    onLoggedOut: () -> Unit
+    onLoggedOut: () -> Unit,
+    userName : String
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -38,6 +39,7 @@ fun SettingsScreen(
 
     // Current saved car profile
     val car = viewModel.getCurrentProfile()
+    var showLogoutConfirm by remember { mutableStateOf(false) }
 
     // Layout that contains the screen content and bottom bar for settings
     Scaffold(
@@ -66,12 +68,7 @@ fun SettingsScreen(
                     )
                 }
                 OutlinedButton(
-                    onClick = {
-                        coroutineScope.launch {
-                            authStore.clearSession()
-                            onLoggedOut()
-                        }
-                    },
+                    onClick = { showLogoutConfirm = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Log out")
@@ -112,6 +109,29 @@ fun SettingsScreen(
                 }
             }
         }
+    }
+    if (showLogoutConfirm) {
+        AlertDialog(
+            onDismissRequest = { showLogoutConfirm = false },
+            title = { Text("Log out?") },
+            text = { Text("Are you sure you want to log out?") },
+            confirmButton = {
+                Button(onClick = {
+                    showLogoutConfirm = false
+                    coroutineScope.launch {
+                        authStore.clearSession()
+                        onLoggedOut()
+                    }
+                }) {
+                    Text("Log out")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showLogoutConfirm = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     // Shows bottom sheet only when editing

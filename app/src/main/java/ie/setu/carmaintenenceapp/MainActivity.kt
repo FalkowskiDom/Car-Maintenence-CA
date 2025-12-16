@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                 }
                 loadingSession = false
             }
-            val userName = if (sessionUserName.isNotBlank()) sessionUserName else "User"
+            val userName = sessionUserName.ifBlank { "" }
             // Apply app theme based on darkMode setting
             CarMaintenanceAppTheme(darkTheme = darkMode) {
                 if (loadingSession){
@@ -109,7 +109,8 @@ class MainActivity : ComponentActivity() {
                                 authIsLogin = true
                                 sessionUserName = ""
                                 showSplash = false
-                            }
+                            },
+                            userName = userName
                         )
                     }
                     authIsLogin -> {
@@ -157,7 +158,8 @@ fun CarMaintenanceApp(
     viewModel: CarViewModel,
     dataStore: CarDataStore,
     authStore: AuthStore,
-    onLoggedOut: () -> Unit
+    onLoggedOut: () -> Unit,
+    userName: String
 ) {
 
     // Tracks the currently selected tab/screen
@@ -182,7 +184,8 @@ fun CarMaintenanceApp(
                 // Shows main dashboard info
                 AppDestinations.HOME -> HomeScreen(
                     modifier = Modifier.padding(innerPadding),
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    userName = userName
                 )
                 // Shows all service reminders
                 AppDestinations.REMINDERS -> ReminderScreen(
@@ -196,9 +199,8 @@ fun CarMaintenanceApp(
                     viewModel = viewModel,
                     dataStore = dataStore,
                     authStore = authStore,
-                    onLoggedOut = { currentDestination = AppDestinations.HOME
-                    onLoggedOut()
-                    }
+                    onLoggedOut = onLoggedOut,
+                    userName = userName
                 )
             }
         }

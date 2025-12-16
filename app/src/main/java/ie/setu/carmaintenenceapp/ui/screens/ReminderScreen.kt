@@ -41,6 +41,8 @@ fun ReminderScreen(
     var openDialog by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
+    var reminderToDelete by remember { mutableStateOf<ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder?>(null) }
+
 
     Column(
         modifier = modifier
@@ -84,7 +86,7 @@ fun ReminderScreen(
 
                         // Delete reminder button
                         IconButton(onClick = {
-                            viewModel.removeReminder(reminder)
+                            reminderToDelete = reminder
 
                             // Persist change to DataStore
                             coroutineScope.launch(Dispatchers.IO) {
@@ -100,6 +102,37 @@ fun ReminderScreen(
                 }
             }
         }
+        if (reminderToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { reminderToDelete = null },
+                title = { Text("Delete reminder?") },
+                text = { Text("Are you sure you want to delete this reminder?") },
+                confirmButton = {
+                    Button(onClick = {
+                        val toDelete = reminderToDelete!!
+                        reminderToDelete = null
+
+                        viewModel.removeReminder(toDelete)
+
+                        // Persist change to DataStore
+                        coroutineScope.launch(Dispatchers.IO) {
+                            dataStore.saveCarData(
+                                viewModel.getCurrentProfile(),
+                                viewModel.reminders
+                            )
+                        }
+                    }) {
+                        Text("Delete")
+                    }
+                },
+                dismissButton = {
+                    OutlinedButton(onClick = { reminderToDelete = null }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+
     }
 
     // Add Reminder Dialog

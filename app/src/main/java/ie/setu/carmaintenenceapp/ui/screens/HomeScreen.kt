@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, viewModel: CarViewModel) {
+fun HomeScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, userName: String) {
     // Read current saved car details from ViewModel state
     val carMake = viewModel.carMake.value
     val carModel = viewModel.carModel.value
@@ -32,6 +32,10 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: CarViewModel) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        Text(
+            text = "Hello, $userName",
+            style = MaterialTheme.typography.headlineSmall
+        )
         // Card showing current car profile info
         Card(
             modifier = Modifier
