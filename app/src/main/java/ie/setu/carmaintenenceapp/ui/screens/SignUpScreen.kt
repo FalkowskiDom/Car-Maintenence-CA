@@ -8,11 +8,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import ie.setu.carmaintenenceapp.data.AuthStore
+import ie.setu.carmaintenenceapp.data.CarDataStore
 import kotlinx.coroutines.launch
 
 @Composable
 fun SignUpScreen(
     authStore: AuthStore,
+    dataStore: CarDataStore,
     onSignUpSuccess: () -> Unit,
     onLoginClick: () -> Unit
 ) {

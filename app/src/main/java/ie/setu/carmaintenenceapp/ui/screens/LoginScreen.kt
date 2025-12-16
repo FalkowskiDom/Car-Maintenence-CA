@@ -9,11 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import ie.setu.carmaintenenceapp.data.AuthStore
+import ie.setu.carmaintenenceapp.data.CarDataStore
 import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
     authStore: AuthStore,
+    dataStore: CarDataStore,
     onLoginSuccess: () -> Unit,
     onSignUpClick: () -> Unit,
     onBypassClick: () -> Unit
@@ -23,6 +25,8 @@ fun LoginScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val darkMode by dataStore.darkModeEnabled.collectAsState(initial = false)
+
 
     Column(
         modifier = Modifier

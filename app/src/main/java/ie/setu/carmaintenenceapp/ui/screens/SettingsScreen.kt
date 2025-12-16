@@ -15,11 +15,18 @@ import kotlinx.coroutines.launch
 import android.app.DatePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
+import ie.setu.carmaintenenceapp.data.AuthStore
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, dataStore: CarDataStore) {
+fun SettingsScreen(
+    modifier: Modifier = Modifier,
+    viewModel: CarViewModel,
+    dataStore: CarDataStore,
+    authStore: AuthStore,
+    onLoggedOut: () -> Unit
+) {
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -35,24 +42,40 @@ fun SettingsScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, dataS
     // Layout that contains the screen content and bottom bar for settings
     Scaffold(
         bottomBar = {
-            Row(
+            Column(
                 Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Dark Mode", style = MaterialTheme.typography.bodyLarge)
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Dark Mode", style = MaterialTheme.typography.bodyLarge)
 
-                // UI switch to enable/disable dark theme
-                Switch(
-                    checked = darkMode,
-                    onCheckedChange = { coroutineScope.launch { dataStore.setDarkMode(it) } },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                        checkedTrackColor = MaterialTheme.colorScheme.secondary
+                    // UI switch to enable/disable dark theme
+                    Switch(
+                        checked = darkMode,
+                        onCheckedChange = { coroutineScope.launch { dataStore.setDarkMode(it) } },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                            checkedTrackColor = MaterialTheme.colorScheme.secondary
+                        )
                     )
-                )
+                }
+                OutlinedButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            authStore.clearSession()
+                            onLoggedOut()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Log out")
+                }
             }
         }
     ) { innerPadding ->

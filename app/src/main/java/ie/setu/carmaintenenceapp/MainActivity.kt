@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import ie.setu.carmaintenenceapp.data.AuthStore
 import ie.setu.carmaintenenceapp.data.CarDataStore
 import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
@@ -105,6 +106,7 @@ class MainActivity : ComponentActivity() {
                         // Show the login screen
                         LoginScreen(
                             authStore = authStore,
+                            dataStore = dataStore,
                             onLoginSuccess = {
                                 CoroutineScope(Dispatchers.Main).launch {
                                     sessionUserName = authStore.getSession()?.username.orEmpty()
@@ -117,6 +119,7 @@ class MainActivity : ComponentActivity() {
                         // Show the sign-up screen
                         SignUpScreen(
                             authStore = authStore,
+                            dataStore = dataStore,
                             onSignUpSuccess = { CoroutineScope(Dispatchers.Main).launch {
                                 sessionUserName = authStore.getSession()?.username.orEmpty()
                                 inApp = true }},
@@ -176,7 +179,9 @@ fun CarMaintenanceApp(viewModel: CarViewModel, dataStore: CarDataStore) {
                 AppDestinations.SETTINGS -> SettingsScreen(
                     modifier = Modifier.padding(innerPadding),
                     viewModel = viewModel,
-                    dataStore = dataStore
+                    dataStore = dataStore,
+                    authStore = AuthStore(LocalContext.current),
+                    onLoggedOut = { currentDestination = AppDestinations.HOME }
                 )
             }
         }
