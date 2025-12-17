@@ -18,7 +18,7 @@ fun LoginScreen(
     dataStore: CarDataStore,
     onLoginSuccess: () -> Unit,
     onSignUpClick: () -> Unit,
-    onBypassClick: () -> Unit
+//    onBypassClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -27,7 +27,10 @@ fun LoginScreen(
     val scope = rememberCoroutineScope()
     val darkMode by dataStore.darkModeEnabled.collectAsState(initial = false)
 
-
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,15 +83,15 @@ fun LoginScreen(
             Text("Login")
         }
         //this part is for testing purposes
-        OutlinedButton(
-            onClick = onBypassClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Bypass")
-        }
+//        OutlinedButton(
+//            onClick = onBypassClick,
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            Text("Bypass")
+//        }
 
         TextButton(onClick = onSignUpClick) {
             Text("Don't have an account? Sign up")
         }
     }
-}
+}}

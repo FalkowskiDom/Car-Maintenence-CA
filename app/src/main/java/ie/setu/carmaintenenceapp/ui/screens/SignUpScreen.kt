@@ -26,7 +26,10 @@ fun SignUpScreen(
     val scope = rememberCoroutineScope()
     var username by remember { mutableStateOf("") }
 
-
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,4 +98,4 @@ fun SignUpScreen(
             Text("Already have an account? Login")
         }
     }
-}
+}}

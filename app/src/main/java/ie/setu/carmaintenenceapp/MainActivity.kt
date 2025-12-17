@@ -94,8 +94,11 @@ class MainActivity : ComponentActivity() {
             val userName = sessionUserName.ifBlank { "" }
             // Apply app theme based on darkMode setting
             CarMaintenanceAppTheme(darkTheme = darkMode) {
-                if (loadingSession){
-                    Text("Loading...")
+                if (loadingSession) {
+                    SplashScreen(
+                        userName = "",
+                        onTimeout = {}
+                    )
                     return@CarMaintenanceAppTheme
                 }
                 // The 'when' statement handles the navigation flow: Splash -> Auth -> Main App
@@ -134,7 +137,7 @@ class MainActivity : ComponentActivity() {
                                     sessionUserName = authStore.getSession()?.username.orEmpty()
                                     inApp = true } },
                             onSignUpClick = { authIsLogin = false }, // Switch to sign-up screen
-                            onBypassClick = { inApp = true } // For testing
+//                            onBypassClick = { inApp = true } // For testing
                         )
                     }
                     else -> {
