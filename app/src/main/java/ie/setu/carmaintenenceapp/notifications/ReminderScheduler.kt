@@ -21,8 +21,7 @@ object ReminderScheduler {
 
         val triggerMillis = runCatching {
             val date = LocalDate.parse(reminder.date, DATE_FORMAT)
-            val time = LocalTime.parse(reminder.time, DateTimeFormatter.ISO_LOCAL_TIME)
-
+            val time = LocalTime.parse(reminder.time, DateTimeFormatter.ofPattern("HH:mm"))
             // choose the time of day you want notifications to fire:
             val triggerDateTime = LocalDateTime.of(date, time)
             triggerDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
