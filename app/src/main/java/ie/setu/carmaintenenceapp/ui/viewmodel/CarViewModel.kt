@@ -51,11 +51,18 @@ class CarViewModel : ViewModel() {
     var reminders = mutableStateListOf<ServiceReminder>()
 
     // Adds a new reminder to the list
-    fun addReminder(title: String, date: String,time: String, description: String): ServiceReminder {
-        val reminder = ServiceReminder(title = title, date = date, time = time, description = description, userId = String() )
+    fun addReminder(userId: String, title: String, date: String, time: String, description: String): ServiceReminder {
+        val reminder = ServiceReminder(
+            title = title,
+            userId = userId,
+            date = date,
+            time = time,
+            description = description
+        )
         reminders.add(reminder)
         return reminder
     }
+
 
     // Removes a reminder when user presses delete
     fun removeReminder(reminder: ServiceReminder) {

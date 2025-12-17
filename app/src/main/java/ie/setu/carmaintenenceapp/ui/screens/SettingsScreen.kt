@@ -26,7 +26,8 @@ fun SettingsScreen(
     dataStore: CarDataStore,
     authStore: AuthStore,
     onLoggedOut: () -> Unit,
-    userName : String
+    userName: String,
+    userId: String
 ) {
 
     val coroutineScope = rememberCoroutineScope()
@@ -143,6 +144,7 @@ fun SettingsScreen(
             EditCarForm(
                 viewModel = viewModel,
                 dataStore = dataStore,
+                userId = userId,
                 onClose = { showEditSheet = false }
             )
         }
@@ -150,7 +152,7 @@ fun SettingsScreen(
 }
 
 @Composable
-fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () -> Unit) {
+fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, userId: String, onClose: () -> Unit) {
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -260,7 +262,7 @@ fun EditCarForm(viewModel: CarViewModel, dataStore: CarDataStore, onClose: () ->
                     )
 
                     coroutineScope.launch {
-                        dataStore.saveCarData(viewModel.getCurrentProfile(), viewModel.reminders)
+                        dataStore.saveCarData(userId, viewModel.getCurrentProfile(), viewModel.reminders)
                     }
 
                     onClose()

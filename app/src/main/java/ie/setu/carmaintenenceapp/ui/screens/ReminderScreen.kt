@@ -148,7 +148,7 @@ fun ReminderScreen(
     // Add Reminder Dialog
     if (openDialog) {
         AddReminderDialog(onDismiss = { openDialog = false }) { title, date, time, desc ->
-            val created = viewModel.addReminder(userId, date, time, desc)
+            val created = viewModel.addReminder(userId, title, date, time,desc)
             ReminderScheduler.schedule(context, created)
 
             // Save updated data to persistence (PER USER)
@@ -316,7 +316,7 @@ fun AddReminderDialog(
         // Confirm and save reminder
         confirmButton = {
             Button(
-                enabled = selectedDateMillis != null && selectedService.isNotEmpty(),
+                enabled = selectedDateMillis != null && selectedService.isNotEmpty() && selectedTime.isNotBlank(),
                 onClick = {
                     onAdd(selectedService, dateText,selectedTime, desc)
                 }
