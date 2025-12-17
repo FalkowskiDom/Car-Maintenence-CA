@@ -25,7 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import ie.setu.carmaintenenceapp.data.AuthStore
 import ie.setu.carmaintenenceapp.data.CarDataStore
 import ie.setu.carmaintenenceapp.ui.screens.HomeScreen
@@ -40,10 +39,20 @@ import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import android.Manifest
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
 
 class MainActivity : ComponentActivity() {
+    private val requestNotifPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         // ViewModel for managing and storing UI state
         val viewModel: CarViewModel by viewModels()

@@ -19,6 +19,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
+import android.app.TimePickerDialog
+import java.util.Calendar
 
 
 // Helper extension to create a clickable area without ripple animation
@@ -114,6 +116,7 @@ fun ReminderScreen(
                         val toDelete = reminderToDelete!!
                         reminderToDelete = null
 
+                        ReminderScheduler.cancel(context, toDelete.id)
                         viewModel.removeReminder(toDelete)
 
                         // Persist change to DataStore
@@ -139,8 +142,8 @@ fun ReminderScreen(
 
     // Add Reminder Dialog
     if (openDialog) {
-        AddReminderDialog(onDismiss = { openDialog = false }) { title, date, desc ->
-            val created = viewModel.addReminder(title, date, desc)
+        AddReminderDialog(onDismiss = { openDialog = false }) { title, date,time, desc ->
+            val created = viewModel.addReminder(title, date, time,desc)
             ReminderScheduler.schedule(context, created)
 
 
@@ -159,7 +162,7 @@ fun ReminderScreen(
 @Composable
 fun AddReminderDialog(
     onDismiss: () -> Unit,
-    onAdd: (String, String, String) -> Unit
+    onAdd: (String, String, String,String) -> Unit
 ) {
     // Dropdown list of reminder types
     val serviceTypes = listOf(
@@ -173,6 +176,11 @@ fun AddReminderDialog(
 
     var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var selectedTime by remember { mutableStateOf("") }
+    var showTimePicker by remember { mutableStateOf(false) }
+    val calendar = Calendar.getInstance()
+    val context = LocalContext.current
+
 
     var desc by remember { mutableStateOf("") }
 
@@ -245,6 +253,21 @@ fun AddReminderDialog(
                         .fillMaxWidth()
                         .noIndicationClickable { showDatePicker = true }
                 )
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    value = selectedTime,
+                    onValueChange = {},
+                    label = { Text("Service Time") },
+                    placeholder = { Text("Select a time") },
+                )
+                Box(
+                    modifier = Modifier
+                        .offset(y = (-76).dp)
+                        .height(56.dp)
+                        .fillMaxWidth()
+                        .noIndicationClickable { showTimePicker = true }
+                )
 
                 // Description text field
                 OutlinedTextField(
@@ -261,7 +284,7 @@ fun AddReminderDialog(
             Button(
                 enabled = selectedDateMillis != null && selectedService.isNotEmpty(),
                 onClick = {
-                    onAdd(selectedService, dateText, desc)
+                    onAdd(selectedService, dateText,selectedTime, desc)
                 }
             ) { Text("Add") }
         },
@@ -290,4 +313,17 @@ fun AddReminderDialog(
             DatePicker(state = pickerState)
         }
     }
+    if (showTimePicker) {
+        TimePickerDialog(
+            context,
+            { _, hour, minute ->
+                selectedTime = String.format("%02d:%02d", hour, minute)
+                showTimePicker = false
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        ).show()
+    }
+
 }

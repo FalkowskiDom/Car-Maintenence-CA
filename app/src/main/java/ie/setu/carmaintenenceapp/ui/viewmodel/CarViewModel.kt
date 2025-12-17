@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter
 data class ServiceReminder(
     val title: String,
     val date: String,
+    val time: String,
     val description: String,
     val id: String = java.util.UUID.randomUUID().toString()
 )
@@ -49,8 +50,8 @@ class CarViewModel : ViewModel() {
     var reminders = mutableStateListOf<ServiceReminder>()
 
     // Adds a new reminder to the list
-    fun addReminder(title: String, date: String, description: String): ServiceReminder {
-        val reminder = ServiceReminder(title = title, date = date, description = description)
+    fun addReminder(title: String, date: String,time: String, description: String): ServiceReminder {
+        val reminder = ServiceReminder(title = title, date = date, time = time, description = description,)
         reminders.add(reminder)
         return reminder
     }

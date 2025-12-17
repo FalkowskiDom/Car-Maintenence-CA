@@ -13,23 +13,23 @@ import kotlin.math.abs
 
 object ReminderScheduler {
 
-    private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE // yyyy-MM-dd
+    private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
     fun schedule(context: Context, reminder: ServiceReminder) {
         val workManager = WorkManager.getInstance(context)
 
         val triggerMillis = runCatching {
             val date = LocalDate.parse(reminder.date, DATE_FORMAT)
+            val time = LocalTime.parse(reminder.time, DateTimeFormatter.ISO_LOCAL_TIME)
 
             // choose the time of day you want notifications to fire:
-            val triggerDateTime = LocalDateTime.of(date, LocalTime.of(9, 0)) // 09:00
+            val triggerDateTime = LocalDateTime.of(date, time)
             triggerDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
         }.getOrNull() ?: return
 
         val nowMillis = System.currentTimeMillis()
         val delayMillis = triggerMillis - nowMillis
 
-        // If date/time is in the past, don’t schedule (or schedule immediately if you prefer)
         if (delayMillis <= 0) return
 
         val notifId = abs(reminder.id.hashCode())
@@ -43,7 +43,7 @@ object ReminderScheduler {
         val request = OneTimeWorkRequestBuilder<ReminderWorker>()
             .setInitialDelay(delayMillis, TimeUnit.MILLISECONDS)
             .setInputData(data)
-            .addTag(reminder.id) // tag with reminder id so we can cancel later
+            .addTag(reminder.id)
             .build()
 
         workManager.enqueueUniqueWork(
