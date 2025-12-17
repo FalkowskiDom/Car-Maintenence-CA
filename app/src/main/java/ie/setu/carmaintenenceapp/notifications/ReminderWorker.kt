@@ -9,11 +9,13 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import ie.setu.carmaintenenceapp.R
 
+//Background worker responsible for displaying reminder notifications.Triggered by WorkManager at the scheduled time.
 class ReminderWorker(
     appContext: Context,
     params: WorkerParameters
 ) : Worker(appContext, params) {
 
+    //Builds and displays the notification when the worker runs.
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun doWork(): Result {
         val title = inputData.getString("title") ?: "Service Reminder"

@@ -34,6 +34,7 @@ fun SplashScreen(
 
     val textAlpha = remember { Animatable(0f) }
 
+    // Creates ExoPlayer instance for splash video playback
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
             val uri = "android.resource://${context.packageName}/${R.raw.splash}".toUri()
@@ -46,7 +47,7 @@ fun SplashScreen(
     DisposableEffect(Unit) {
         onDispose { exoPlayer.release() }
     }
-
+    // Starts splash timeout and animation
     LaunchedEffect(Unit) {
         textAlpha.animateTo(
             targetValue = 1f,
@@ -55,6 +56,7 @@ fun SplashScreen(
         delay(2200)
         onTimeout()
     }
+    // Fullscreen layout and Video player view
     Box(
         modifier = Modifier.fillMaxSize()){
         AndroidView(
@@ -68,6 +70,7 @@ fun SplashScreen(
             }
         )
 
+        //Welcome message on Splash screen
         Text(
             text = if (userName.isNotEmpty()) "Welcome, $userName!" else "Welcome!",
             style = MaterialTheme.typography.headlineMedium,

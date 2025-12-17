@@ -44,6 +44,7 @@ import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
 
 class MainActivity : ComponentActivity() {
+    //     Requests notification permission.Required for reminder notifications to appear.
     private val requestNotifPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 

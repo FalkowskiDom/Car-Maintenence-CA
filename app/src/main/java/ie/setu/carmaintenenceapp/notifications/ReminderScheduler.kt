@@ -15,6 +15,7 @@ object ReminderScheduler {
 
     private val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
+     //Schedules a one-time notification for a specific service reminder.Uses WorkManager to ensure delivery even if the app is closed.
     fun schedule(context: Context, reminder: ServiceReminder) {
         val workManager = WorkManager.getInstance(context)
 
@@ -53,6 +54,7 @@ object ReminderScheduler {
         )
     }
 
+    //Cancels a previously scheduled reminder notification. Called when a reminder is deleted.
     fun cancel(context: Context, reminderId: String) {
         val workManager = WorkManager.getInstance(context)
         workManager.cancelAllWorkByTag(reminderId)

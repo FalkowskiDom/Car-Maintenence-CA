@@ -20,13 +20,17 @@ fun LoginScreen(
     onSignUpClick: () -> Unit,
 //    onBypassClick: () -> Unit
 ) {
+    // UI state for user input and error handling
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     val darkMode by dataStore.darkModeEnabled.collectAsState(initial = false)
 
+    // Coroutine scope for running login asynchronously
+    val scope = rememberCoroutineScope()
+
+    // Root surface that applies theme background color
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -66,6 +70,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Login button triggers authentication via AuthStore
         Button(
             enabled = !loading,
             onClick = {
@@ -89,7 +94,7 @@ fun LoginScreen(
 //        ) {
 //            Text("Bypass")
 //        }
-
+        // Navigates to sign-up screen
         TextButton(onClick = onSignUpClick) {
             Text("Don't have an account? Sign up")
         }

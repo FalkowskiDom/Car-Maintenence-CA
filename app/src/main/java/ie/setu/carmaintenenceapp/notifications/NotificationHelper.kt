@@ -7,8 +7,10 @@ import android.os.Build
 
 
 object NotificationHelper {
+    //Notification channel ID used for service reminders
     const val CHANNEL_ID = "reminders_channel"
 
+    //Creates the notification channel required. Must be called once when the app starts.
     fun createChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(

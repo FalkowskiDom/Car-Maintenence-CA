@@ -18,13 +18,16 @@ fun SignUpScreen(
     onSignUpSuccess: () -> Unit,
     onLoginClick: () -> Unit
 ) {
+    // User input and UI state
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
     var username by remember { mutableStateOf("") }
+
+    // Coroutine scope for async sign-up logic
+    val scope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -78,6 +81,7 @@ fun SignUpScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Creates a new user via AuthStore
         Button(
             enabled = !loading && password == confirmPassword && password.isNotEmpty() && username.isNotEmpty(),
             onClick = {
@@ -94,6 +98,7 @@ fun SignUpScreen(
         ) {
             Text("Sign Up")
         }
+        // Navigate back to login screen
         TextButton(onClick = onLoginClick) {
             Text("Already have an account? Login")
         }

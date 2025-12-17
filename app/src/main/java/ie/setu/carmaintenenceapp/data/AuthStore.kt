@@ -33,7 +33,7 @@ class AuthStore(private val context: Context) {
         prettyPrint = true
         ignoreUnknownKeys = true
     }
-
+    //Reads all registered users from users.json.Returns an empty list if the file does not exist or is invalid.
     private suspend fun readUsers(): UsersFile = withContext(Dispatchers.IO) {
         if (!usersFile.exists()) return@withContext UsersFile()
 
@@ -43,14 +43,16 @@ class AuthStore(private val context: Context) {
         runCatching { json.decodeFromString<UsersFile>(text) }
             .getOrElse { UsersFile() }
     }
-
+    //Writes the currently logged-in user to session.json.Used to persist login across app restarts.
     private suspend fun writeSession(session: SessionFile) = withContext(Dispatchers.IO) {
         sessionFile.writeText(json.encodeToString(session))
     }
+    // Writes all registered users back to users.json.
     private suspend fun writeUsers(users: UsersFile) = withContext(Dispatchers.IO) {
         usersFile.writeText(json.encodeToString(users))
     }
 
+    //Retrieves the current logged-in session, if one exists.Returns null if the user is logged out.
     suspend fun getSession(): SessionFile? = withContext(Dispatchers.IO) {
         if (!sessionFile.exists()) return@withContext null
 
@@ -60,11 +62,11 @@ class AuthStore(private val context: Context) {
         runCatching { json.decodeFromString<SessionFile>(text) }
             .getOrNull()
     }
-
+    //Clears the current login session by deleting session.json.Used during logout.
     suspend fun clearSession() = withContext(Dispatchers.IO) {
         if (sessionFile.exists()) sessionFile.delete()
     }
-
+    //Registers a new user.Saves user details to users.json and creates a login session.
     suspend fun signUp(emailRaw: String, password: String, usernameRaw: String): Result<Unit> {
         val email = emailRaw.trim().lowercase()
         val username = usernameRaw.trim()
@@ -87,7 +89,7 @@ class AuthStore(private val context: Context) {
         writeSession(SessionFile(email = email, username = username))
         return Result.success(Unit)
     }
-
+//Authenticates an existing user. If successful, writes a new session to session.json.
     suspend fun login(emailRaw: String, password: String): Result<Unit> {
         val email = emailRaw.trim().lowercase()
 
