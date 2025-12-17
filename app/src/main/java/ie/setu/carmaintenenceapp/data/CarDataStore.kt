@@ -6,10 +6,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.Flow
-import kotlinx.serialization.json.Json
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 // Creates a single DataStore instance for the whole app (persistent storage)
 val Context.dataStore by preferencesDataStore("car_prefs")
@@ -18,19 +18,20 @@ class CarDataStore(private val context: Context) {
 
     companion object {
         // Keys used to save and retrieve JSON data from DataStore
-        private val CAR_DATA = stringPreferencesKey("car_data")
-        private val REMINDERS = stringPreferencesKey("reminders")
 
         // Key for storing dark mode setting
         private val DARK_MODE = booleanPreferencesKey("dark_mode")
     }
 
-    //Save everything to DataStore (car profile + reminders list)
-    suspend fun saveCarData(car: CarProfile, reminders: List<ServiceReminder>) {
+    // Per-user keys
+    private fun carKey(userId: String) = stringPreferencesKey("car_data_$userId")
+    private fun remindersKey(userId: String) = stringPreferencesKey("reminders_$userId")
+
+    // Save everything to DataStore (car profile + reminders list)
+    suspend fun saveCarData(userId: String, car: CarProfile, reminders: List<ServiceReminder>) {
         context.dataStore.edit { prefs ->
-            // Convert objects into JSON strings before saving
-            prefs[CAR_DATA] = Json.encodeToString(car)
-            prefs[REMINDERS] = Json.encodeToString(reminders)
+            prefs[carKey(userId)] = Json.encodeToString(car)
+            prefs[remindersKey(userId)] = Json.encodeToString(reminders)
         }
     }
 
@@ -42,17 +43,14 @@ class CarDataStore(private val context: Context) {
     }
 
     //Flow that continuously returns saved values when changed
-    val loadData: Flow<Pair<CarProfile?, List<ServiceReminder>>> =
+    fun loadData(userId: String): Flow<Pair<CarProfile?, List<ServiceReminder>>> =
         context.dataStore.data.map { prefs ->
-            // Load car profile from JSON (if saved)
-            val car = prefs[CAR_DATA]?.let { Json.decodeFromString<CarProfile>(it) }
+            val car = prefs[carKey(userId)]?.let { Json.decodeFromString<CarProfile>(it) }
 
-            // Load reminders list from JSON
-            val reminders = prefs[REMINDERS]?.let {
+            val reminders = prefs[remindersKey(userId)]?.let {
                 Json.decodeFromString<List<ServiceReminder>>(it)
             } ?: emptyList()
 
-            // Return pair of data so ViewModel can update UI
             car to reminders
         }
     //Returns true/false to set theme mode

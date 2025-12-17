@@ -65,11 +65,6 @@ class MainActivity : ComponentActivity() {
         NotificationHelper.createChannel(this)
 
         // Load any previously saved data when app opens
-        CoroutineScope(Dispatchers.IO).launch {
-            dataStore.loadData.collect { (car, reminders) ->
-                viewModel.loadFromDataStore(car, reminders)
-            }
-        }
 
         enableEdgeToEdge() // Enables full screen UI
 
@@ -83,15 +78,25 @@ class MainActivity : ComponentActivity() {
             var showSplash by rememberSaveable { mutableStateOf(true) }
             var inApp by rememberSaveable { mutableStateOf(false) }
             var authIsLogin by rememberSaveable { mutableStateOf(true) }
+            var sessionEmail by rememberSaveable { mutableStateOf("") }
 
             LaunchedEffect(Unit) {
                 val session = authStore.getSession()
                 if (session != null) {
                     sessionUserName = session.username
+                    sessionEmail = session.email
                     inApp = true // user stays logged in
                 }
                 loadingSession = false
             }
+            LaunchedEffect(sessionEmail) {
+                if (sessionEmail.isNotBlank()) {
+                    dataStore.loadData(sessionEmail).collect { (car, reminders) ->
+                        viewModel.loadFromDataStore(car, reminders)
+                    }
+                }
+            }
+
             val userName = sessionUserName.ifBlank { "" }
             // Apply app theme based on darkMode setting
             CarMaintenanceAppTheme(darkTheme = darkMode) {
@@ -123,9 +128,11 @@ class MainActivity : ComponentActivity() {
                                 inApp = false
                                 authIsLogin = true
                                 sessionUserName = ""
+                                sessionEmail = ""
                                 showSplash = false
                             },
-                            userName = userName
+                            userName = userName,
+                            userId = sessionEmail
                         )
                     }
                     authIsLogin -> {
@@ -135,8 +142,12 @@ class MainActivity : ComponentActivity() {
                             dataStore = dataStore,
                             onLoginSuccess = {
                                 CoroutineScope(Dispatchers.Main).launch {
-                                    sessionUserName = authStore.getSession()?.username.orEmpty()
-                                    inApp = true } },
+                                    val session = authStore.getSession()
+                                    sessionUserName = session?.username.orEmpty()
+                                    sessionEmail = session?.email.orEmpty()
+                                    inApp = true
+                                }
+                            },
                             onSignUpClick = { authIsLogin = false }, // Switch to sign-up screen
 //                            onBypassClick = { inApp = true } // For testing
                         )
@@ -146,9 +157,15 @@ class MainActivity : ComponentActivity() {
                         SignUpScreen(
                             authStore = authStore,
                             dataStore = dataStore,
-                            onSignUpSuccess = { CoroutineScope(Dispatchers.Main).launch {
-                                sessionUserName = authStore.getSession()?.username.orEmpty()
-                                inApp = true }},
+                            onSignUpSuccess = {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    val session = authStore.getSession()
+                                    sessionUserName = session?.username.orEmpty()
+                                    sessionEmail = session?.email.orEmpty()
+                                    inApp = true
+                                }
+                            }
+                            ,
                             onLoginClick = { authIsLogin = true } // Switch back to login screen
                         )
                     }
@@ -174,7 +191,8 @@ fun CarMaintenanceApp(
     dataStore: CarDataStore,
     authStore: AuthStore,
     onLoggedOut: () -> Unit,
-    userName: String
+    userName: String,
+    userId: String 
 ) {
 
     // Tracks the currently selected tab/screen
@@ -206,7 +224,8 @@ fun CarMaintenanceApp(
                 AppDestinations.REMINDERS -> ReminderScreen(
                     modifier = Modifier.padding(innerPadding),
                     viewModel = viewModel,
-                    dataStore = dataStore
+                    dataStore = dataStore,
+                    userId = userName
                 )
                 // Car profile + theme settings
                 AppDestinations.SETTINGS -> SettingsScreen(

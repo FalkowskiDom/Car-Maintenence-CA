@@ -1,5 +1,6 @@
 package ie.setu.carmaintenenceapp.ui.screens
 
+import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -9,19 +10,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import ie.setu.carmaintenenceapp.data.CarDataStore
-import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
-import androidx.compose.ui.platform.LocalContext
 import ie.setu.carmaintenenceapp.notifications.ReminderScheduler
+import ie.setu.carmaintenenceapp.ui.viewmodel.CarViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
-import android.app.TimePickerDialog
-import java.util.Calendar
-
+import java.util.*
 
 // Helper extension to create a clickable area without ripple animation
 @Composable
@@ -38,13 +39,23 @@ private fun Modifier.noIndicationClickable(onClick: () -> Unit): Modifier =
 fun ReminderScreen(
     modifier: Modifier = Modifier,
     viewModel: CarViewModel,
-    dataStore: CarDataStore
+    dataStore: CarDataStore,
+    userId: String // NEW: per-user persistence key
 ) {
     // Controls showing the Add Reminder dialog
     var openDialog by remember { mutableStateOf(false) }
 
     val coroutineScope = rememberCoroutineScope()
-    var reminderToDelete by remember { mutableStateOf<ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder?>(null) }
+    var reminderToDelete by remember {
+        mutableStateOf<ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder?>(
+            null
+        )
+    }
+    var reminderToEdit by remember {
+        mutableStateOf<ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder?>(
+            null
+        )
+    }
     val context = LocalContext.current
 
 
@@ -73,7 +84,8 @@ fun ReminderScreen(
                 Card(
                     modifier = Modifier
                         .padding(vertical = 6.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .clickable { reminderToEdit = reminder },
                     colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Row(
@@ -84,21 +96,13 @@ fun ReminderScreen(
                     ) {
                         Column(Modifier.weight(1f)) {
                             Text(reminder.title, style = MaterialTheme.typography.titleMedium)
-                            Text("Date: ${reminder.date}")
+                            Text("On: ${reminder.date} at ${reminder.time}")
                             Text(reminder.description)
                         }
 
                         // Delete reminder button
                         IconButton(onClick = {
                             reminderToDelete = reminder
-
-                            // Persist change to DataStore
-                            coroutineScope.launch(Dispatchers.IO) {
-                                dataStore.saveCarData(
-                                    viewModel.getCurrentProfile(),
-                                    viewModel.reminders
-                                )
-                            }
                         }) {
                             Icon(Icons.Default.Close, contentDescription = "Delete reminder")
                         }
@@ -119,9 +123,10 @@ fun ReminderScreen(
                         ReminderScheduler.cancel(context, toDelete.id)
                         viewModel.removeReminder(toDelete)
 
-                        // Persist change to DataStore
+                        // Persist change to DataStore (PER USER)
                         coroutineScope.launch(Dispatchers.IO) {
                             dataStore.saveCarData(
+                                userId,
                                 viewModel.getCurrentProfile(),
                                 viewModel.reminders
                             )
@@ -142,21 +147,50 @@ fun ReminderScreen(
 
     // Add Reminder Dialog
     if (openDialog) {
-        AddReminderDialog(onDismiss = { openDialog = false }) { title, date,time, desc ->
-            val created = viewModel.addReminder(title, date, time,desc)
+        AddReminderDialog(onDismiss = { openDialog = false }) { title, date, time, desc ->
+            val created = viewModel.addReminder(userId, date, time, desc)
             ReminderScheduler.schedule(context, created)
 
-
-            // Save updated data to persistence
+            // Save updated data to persistence (PER USER)
             coroutineScope.launch(Dispatchers.IO) {
-                dataStore.saveCarData(viewModel.getCurrentProfile(), viewModel.reminders)
+                dataStore.saveCarData(
+                    userId,
+                    viewModel.getCurrentProfile(),
+                    viewModel.reminders
+                )
             }
 
             openDialog = false
         }
     }
-}
 
+    if (reminderToEdit != null) {
+        EditReminderDialog(
+            initial = reminderToEdit!!,
+            onDismiss = { reminderToEdit = null },
+            onSave = { updated ->
+                val old = reminderToEdit!!
+                reminderToEdit = null
+
+                val idx = viewModel.reminders.indexOfFirst { it.id == old.id }
+                if (idx != -1) {
+                    ReminderScheduler.cancel(context, old.id)
+                    viewModel.reminders[idx] = updated
+                    ReminderScheduler.schedule(context, updated)
+
+                    // Persist change (PER USER)
+                    coroutineScope.launch(Dispatchers.IO) {
+                        dataStore.saveCarData(
+                            userId,
+                            viewModel.getCurrentProfile(),
+                            viewModel.reminders
+                        )
+                    }
+                }
+            }
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -290,6 +324,151 @@ fun AddReminderDialog(
         },
 
         dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+
+    if (showDatePicker) {
+        val pickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDateMillis)
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedDateMillis = pickerState.selectedDateMillis
+                    showDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = pickerState)
+        }
+    }
+
+    if (showTimePicker) {
+        TimePickerDialog(
+            context,
+            { _, hourOfDay, minute ->
+                selectedTime = String.format("%02d:%02d", hourOfDay, minute)
+                showTimePicker = false
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        ).show()
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditReminderDialog(
+    initial: ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder,
+    onDismiss: () -> Unit,
+    onSave: (ie.setu.carmaintenenceapp.ui.viewmodel.ServiceReminder) -> Unit
+) {
+    // (UNCHANGED from your file)
+    var title by remember { mutableStateOf(initial.title) }
+    var description by remember { mutableStateOf(initial.description) }
+
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    val initialDate = remember {
+        try {
+            java.time.LocalDate.parse(initial.date).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                .toEpochMilli()
+        } catch (e: Exception) {
+            null
+        }
+    }
+    var selectedDateMillis by remember { mutableStateOf(initialDate) }
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    var selectedTime by remember { mutableStateOf(initial.time) }
+    var showTimePicker by remember { mutableStateOf(false) }
+
+    val dateText = remember(selectedDateMillis) {
+        selectedDateMillis?.let { millis ->
+            Instant.ofEpochMilli(millis)
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .toString()
+        } ?: ""
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Edit Service Reminder") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Service Type") },
+                    readOnly = true
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    value = dateText,
+                    onValueChange = {},
+                    label = { Text("Service Date") },
+                    placeholder = { Text("Select a date") },
+                )
+
+                Box(
+                    modifier = Modifier
+                        .offset(y = (-76).dp)
+                        .height(56.dp)
+                        .fillMaxWidth()
+                        .noIndicationClickable { showDatePicker = true }
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    value = selectedTime,
+                    onValueChange = {},
+                    label = { Text("Service Time") },
+                    placeholder = { Text("Select a time") },
+                )
+
+                Box(
+                    modifier = Modifier
+                        .offset(y = (-76).dp)
+                        .height(56.dp)
+                        .fillMaxWidth()
+                        .noIndicationClickable { showTimePicker = true }
+                )
+
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Description") },
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                enabled = selectedDateMillis != null,
+                onClick = {
+                    val updatedReminder = initial.copy(
+                        title = title,
+                        date = dateText,
+                        time = selectedTime,
+                        description = description
+                    )
+                    onSave(updatedReminder)
+                }
+            ) { Text("Save") }
+        },
+        dismissButton = {
             OutlinedButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
@@ -316,8 +495,8 @@ fun AddReminderDialog(
     if (showTimePicker) {
         TimePickerDialog(
             context,
-            { _, hour, minute ->
-                selectedTime = String.format("%02d:%02d", hour, minute)
+            { _, hourOfDay, minute ->
+                selectedTime = String.format("%02d:%02d", hourOfDay, minute)
                 showTimePicker = false
             },
             calendar.get(Calendar.HOUR_OF_DAY),

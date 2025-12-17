@@ -90,7 +90,9 @@ fun HomeScreen(modifier: Modifier = Modifier, viewModel: CarViewModel, userName:
                             horizontalAlignment = Alignment.Start
                         ) {
                             Text(reminder.title, style = MaterialTheme.typography.titleMedium)
-                            Text("Date: ${reminder.date}", style = MaterialTheme.typography.bodyMedium)
+
+                            Text("Date: ${reminder.date}  Time: ${reminder.time}", style = MaterialTheme.typography.bodyMedium)
+
                             Text(reminder.description, style = MaterialTheme.typography.bodySmall)
                         }
                     }

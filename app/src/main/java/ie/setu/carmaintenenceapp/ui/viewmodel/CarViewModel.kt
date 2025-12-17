@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter
 @Serializable
 data class ServiceReminder(
     val title: String,
+    val userId:String,
     val date: String,
     val time: String,
     val description: String,
@@ -51,7 +52,7 @@ class CarViewModel : ViewModel() {
 
     // Adds a new reminder to the list
     fun addReminder(title: String, date: String,time: String, description: String): ServiceReminder {
-        val reminder = ServiceReminder(title = title, date = date, time = time, description = description,)
+        val reminder = ServiceReminder(title = title, date = date, time = time, description = description, userId = String() )
         reminders.add(reminder)
         return reminder
     }
