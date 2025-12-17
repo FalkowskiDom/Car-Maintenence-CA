@@ -225,7 +225,7 @@ fun CarMaintenanceApp(
                     modifier = Modifier.padding(innerPadding),
                     viewModel = viewModel,
                     dataStore = dataStore,
-                    userId = userName
+                    userId = userId
                 )
                 // Car profile + theme settings
                 AppDestinations.SETTINGS -> SettingsScreen(
@@ -234,7 +234,8 @@ fun CarMaintenanceApp(
                     dataStore = dataStore,
                     authStore = authStore,
                     onLoggedOut = onLoggedOut,
-                    userName = userName
+                    userName = userName,
+                    userId = userId
                 )
             }
         }
